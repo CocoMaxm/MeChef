@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChefMtaani - Book Your Personal Chef</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#" onclick="showPage('homePage')">
+                <i class="fas fa-chef-hat"></i> ChefMtaani
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('homePage'); return false;">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('cuisinesPage'); return false;">Cuisines</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('orderFoodPage'); return false;">Order Food</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('aboutPage'); return false;">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('contactPage'); return false;">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('extranetPage'); return false;">For Chefs</a></li>
+                    <li class="nav-item ms-lg-3 my-2 my-lg-0">
+                        <select class="form-select form-select-sm js-country-select" aria-label="Country"></select>
+                    </li>
+                    <li class="nav-item ms-lg-2 my-2 my-lg-0" id="navAuth"></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading Spinner -->
+    <div class="spinner-container" id="loadingSpinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="homePage" class="page" style="margin-top: 76px;">
+        <!-- Hero Slider -->
+        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="cuisinesImages/italianpizzaRc.jpeg" alt="Italian Cuisine">
+                    <div class="carousel-overlay">
+                        <div class="carousel-caption">
+                            <h1>Italian Cuisine</h1>
+                            <p>Experience authentic pasta, pizza, and Mediterranean flavors crafted by expert Italian chefs</p>
+                            <button class="btn btn-lg btn-primary" onclick="showPage('cuisinesPage')">Book a Chef</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="cuisinesImages/asian.jpeg" alt="Asian Cuisine">
+                    <div class="carousel-overlay">
+                        <div class="carousel-caption">
+                            <h1>Asian Fusion</h1>
+                            <p>Discover the perfect blend of traditional Asian flavors with modern culinary techniques</p>
+                            <button class="btn btn-lg btn-primary" onclick="showPage('cuisinesPage')">Book a Chef</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="cuisinesImages/frenchCuisineCarousel.jpeg" alt="French Cuisine">
+                    <div class="carousel-overlay">
+                        <div class="carousel-caption">
+                            <h1>French Fine Dining</h1>
+                            <p>Indulge in exquisite French cuisine prepared by classically trained chefs</p>
+                            <button class="btn btn-lg btn-primary" onclick="showPage('cuisinesPage')">Book a Chef</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+
+        <!-- Introduction Section -->
+        <section class="container my-5 py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="display-4 fw-bold mb-4">Experience the Culinary World at Your Table</h2>
+                    <p class="lead mb-4">
+                        Welcome to ChefMtaani, where we bring professional chefs directly to your home. Whether you're hosting a special dinner party, celebrating an anniversary, or simply want to experience restaurant-quality cuisine in the comfort of your own space, our network of talented chefs is here to make it happen.
+                    </p>
+                    <p class="mb-4">
+                        From authentic Italian pasta to exotic Asian fusion, from classic French techniques to modern molecular gastronomy, our chefs specialize in cuisines from around the globe. Each chef is carefully vetted for their expertise, professionalism, and passion for creating unforgettable dining experiences.
+                    </p>
+                    <button class="btn btn-lg btn-primary" onclick="showPage('cuisinesPage')">
+                        <i class="fas fa-utensils me-2"></i>Book a Chef Now
+                    </button>
+                </div>
+                <div class="col-lg-6">
+                    <img src="cuisinesImages/two-african-chefs.jpg" alt="Professional Chef" class="img-fluid rounded shadow">
+                    <!-- https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Counter Section -->
+        <section class="stats-section">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-box">
+                            <span class="stat-number" data-target="500">0</span>
+                            <div class="stat-label">Professional Chefs</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-box">
+                            <span class="stat-number" data-target="25">0</span>
+                            <div class="stat-label">Cuisines Available</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-box">
+                            <span class="stat-number" data-target="10000">0</span>
+                            <div class="stat-label">Happy Customers</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-box">
+                            <span class="stat-number" data-target="98">0</span>
+                            <div class="stat-label">% Satisfaction Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="container my-5 py-5">
+            <h2 class="text-center mb-5">What Our Customers Say</h2>
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="testimonial-card">
+                        <div class="testimonial-text">
+                            "The Italian chef we booked for our anniversary was absolutely phenomenal. The homemade pasta was better than any restaurant we've been to!"
+                        </div>
+                        <div class="testimonial-author">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <span class="ms-2">Sarah Chausiku</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="testimonial-card">
+                        <div class="testimonial-text">
+                            "Booking through ChefMtaani was so easy. Our chef arrived on time, brought all the ingredients, and left our kitchen spotless. Highly recommend!"
+                        </div>
+                        <div class="testimonial-author">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <span class="ms-2">Michael Mzee</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="testimonial-card">
+                        <div class="testimonial-text">
+                            "We hired a French chef for my mother's 70th birthday. The entire family was blown away by the quality and presentation of the food!"
+                        </div>
+                        <div class="testimonial-author">
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <i class="fas fa-star text-warning"></i>
+                            <span class="ms-2">Emma Wambo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Cuisines Page -->
+    <div id="cuisinesPage" class="page" style="margin-top: 76px;">
+        <!-- Hero Section -->
+        <div class="page-hero" style="background-image: url('cuisinesImages/asianCuisineCard.jpeg');">
+            <div class="page-hero-content">
+                <h1 class="display-3 fw-bold">Explore World Cuisines</h1>
+                <p class="lead">Choose from our selection of expert chefs specializing in cuisines from around the globe</p>
+            </div>
+        </div>
+
+        <!-- Cuisines Info Section -->
+        <section class="container my-5">
+            <div class="text-center mb-5">
+                <h2 class="mb-4">Book Your Perfect Chef</h2>
+                <p class="lead">Browse through our diverse selection of cuisines and find the perfect chef for your next culinary experience. Each of our chefs brings authentic flavors and professional expertise right to your kitchen.</p>
+            </div>
+
+            <div class="d-flex justify-content-center align-items-center gap-2 mb-4 flex-wrap">
+                <span class="text-muted">Showing chefs in</span>
+                <select class="form-select w-auto js-country-select" aria-label="Country"></select>
+            </div>
+
+            <!-- Cuisine Cards Grid -->
+            <div class="row" id="cuisineCards">
+                <div class="col-lg-4 col-md-6">
+                    <div class="cuisine-card" onclick="showChefs('Italian')">
+                        <img src="cuisinesImages/italianCuisineCard.jpeg" alt="Italian Cuisine">
+                        <div class="cuisine-card-body">
+                            <h4>Italian</h4>
+                            <p>Authentic pasta, risotto, and classic Italian dishes</p>
+                            <small class="text-muted">15 Chefs Available</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="cuisine-card" onclick="showChefs('French')">
+                        <img src="cuisinesImages/frenchmapsq.jpeg" alt="French Cuisine">
+                        <div class="cuisine-card-body">
+                            <h4>French</h4>
+                            <p>Fine dining and classic French culinary techniques</p>
+                            <small class="text-muted">12 Chefs Available</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="cuisine-card" onclick="showChefs('Asian')">
+                        <img src="cuisinesImages/asianCuisineCard.jpeg" alt="Asian Cuisine">
+                        <div class="cuisine-card-body">
+                            <h4>Asian Fusion</h4>
+                            <p>Japanese, Chinese, Thai, and modern Asian fusion</p>
+                            <small class="text-muted">18 Chefs Available</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="cuisine-card" onclick="showChefs('Mexican')">
+                        <img src="cuisinesImages/mexicanCuisineCard.jpeg" alt="Mexican Cuisine">
+                        <div class="cuisine-card-body">
+                            <h4>Mexican</h4>
+                            <p>Traditional tacos, enchiladas, and regional specialties</p>
+                            <small class="text-muted">10 Chefs Available</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="cuisine-card" onclick="showChefs('Indian')">
+                        <img src="cuisinesImages/indianCuisineCard.jpeg" alt="Indian Cuisine">
+                        <div class="cuisine-card-body">
+                            <h4>Indian</h4>
+                            <p>Authentic curries, tandoori, and regional Indian dishes</p>
+                            <small class="text-muted">14 Chefs Available</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="cuisine-card" onclick="showChefs('Mediterranean')">
+                        <img src="cuisinesImages/mediterraneanCuisineCard.jpeg" alt="Mediterranean Cuisine">
+                        <div class="cuisine-card-body">
+                            <h4>Mediterranean</h4>
+                            <p>Greek, Spanish, and coastal Mediterranean flavors</p>
+                            <small class="text-muted">11 Chefs Available</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="cuisine-card" onclick="showChefs('Kenyan')">
+                        <img src="cuisinesImages/kenyaSq.jpeg" alt="Kenyan Cuisine">
+                        <div class="cuisine-card-body">
+                            <h4>Kenyan</h4>
+                            <p>Reflects the country's diverse ethnic groups, often featuring hearty and wholesome dishes.</p>
+                            <small class="text-muted">11 Chefs Available</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chef Display Section (Initially Hidden) -->
+        <section id="chefDisplaySection" class="container my-5" style="display: none;">
+            <button class="btn btn-secondary mb-4" onclick="hideChefs()">
+                <i class="fas fa-arrow-left me-2"></i>Back to Cuisines
+            </button>
+            <h3 id="selectedCuisineTitle" class="mb-4"></h3>
+            <div id="chefsList" class="row">
+                <!-- Chef cards will be dynamically inserted here -->
+            </div>
+        </section>
+    </div>
+
+    <!-- About Page -->
+    <div id="aboutPage" class="page" style="margin-top: 76px;">
+        <div class="page-hero" style="background-image: url('cuisinesImages/aboutTopPageCard.jpeg');">
+            <div class="page-hero-content">
+                <h1 class="display-3 fw-bold">About ChefMtaani</h1>
+                <p class="lead">Bringing culinary excellence to your home</p>
+            </div>
+        </div>
+
+        <section class="container my-5 py-5">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="mb-4">Save Time, Explore Cultures</h2>
+                    <p class="lead mb-4">
+                        In today's fast-paced world, finding time to prepare elaborate meals or explore new cuisines can be challenging. ChefMtaani bridges this gap by bringing professional culinary expertise directly to your doorstep.
+                    </p>
+                    <p class="mb-4">
+                        Our platform connects you with skilled chefs who are passionate about sharing their cultural heritage through food. Whether you're curious about authentic Thai street food, craving homemade Italian pasta, or wanting to experience the sophistication of French cuisine, our chefs make it possible without the hassle of restaurant reservations or takeout compromises.
+                    </p>
+                    <p class="mb-5">
+                        By booking a personal chef, you're not just saving time on cooking and cleanup – you're investing in an experience. Watch as your chef prepares each dish, learn about ingredients and techniques, and enjoy restaurant-quality meals in the comfort of your own home. It's the perfect solution for busy professionals, food enthusiasts, and anyone who values quality time with loved ones over hours spent in the kitchen.
+                    </p>
+
+                    <h2 class="mb-4 mt-5">Culinary Blog</h2>
+                    
+                    <article class="mb-5">
+                        <h4>The Art of Italian Pasta Making</h4>
+                        <p class="text-muted">Published on June 15, 2024</p>
+                        <p>
+                            Italian cuisine is renowned for its simplicity and focus on quality ingredients. At the heart of this culinary tradition lies pasta – a versatile canvas for countless flavor combinations. Our Italian chefs bring generations of pasta-making expertise to your kitchen, from hand-rolled tagliatelle to perfectly al dente spaghetti. Learn the secrets of authentic carbonara, discover regional variations like Sicilian pasta alla Norma, and understand why the quality of ingredients makes all the difference in Italian cooking.
+                        </p>
+                    </article>
+
+                    <article class="mb-5">
+                        <h4>Exploring the Spice Routes: Indian Cuisine</h4>
+                        <p class="text-muted">Published on June 10, 2024</p>
+                        <p>
+                            Indian cuisine offers an explosion of flavors, colors, and aromas that tell the story of a rich cultural heritage. From the creamy kormas of the North to the coconut-based curries of the South, each region brings its unique twist to Indian cooking. Our Indian chefs are masters of spice blending, creating perfectly balanced dishes that range from mild and aromatic to fiery hot. Experience the magic of freshly ground garam masala, the complexity of a well-made biryani, and the comfort of warm naan bread straight from the tandoor.
+                        </p>
+                    </article>
+
+                    <article class="mb-5">
+                        <h4>Japanese Cuisine: More Than Just Sushi</h4>
+                        <p class="text-muted">Published on June 5, 2024</p>
+                        <p>
+                            While sushi might be Japan's most famous culinary export, the country's food culture extends far beyond raw fish. Japanese cuisine emphasizes seasonality, presentation, and umami – the fifth taste. Our Japanese chefs can introduce you to comforting ramen bowls, crispy tempura, savory okonomiyaki, and the theatrical experience of teppanyaki. Learn about the philosophy of washoku (traditional Japanese cuisine) and how every element on the plate serves both aesthetic and flavor purposes.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Contact Page -->
+    <div id="contactPage" class="page" style="margin-top: 76px;">
+        <div class="page-hero" style="background-image: url('cuisinesImages/ContactImg.jpeg');">
+            <div class="page-hero-content">
+                <h1 class="display-3 fw-bold">Contact Us</h1>
+                <p class="lead">We're here to help with your culinary needs</p>
+            </div>
+        </div>
+
+        <section class="container my-5 py-5">
+            <div class="row">
+                <div class="col-lg-6 mb-5">
+                    <h2 class="mb-4">Get in Touch</h2>
+                    <form id="contactForm">
+                        <div class="mb-3">
+                            <label for="contactName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="contactName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="contactEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactSubject" class="form-label">Subject</label>
+                            <select class="form-control" id="contactSubject" required>
+                                <option value="">Select a subject</option>
+                                <option value="booking">Booking Inquiry</option>
+                                <option value="complaint">Complaint</option>
+                                <option value="feedback">Feedback</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contactMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="contactMessage" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Send Message
+                        </button>
+                    </form>
+                </div>
+                <div class="col-lg-6 mb-5">
+                    <h2 class="mb-4">Contact Information</h2>
+                    <div class="mb-4">
+                        <h5><i class="fas fa-envelope me-2 text-primary"></i>Email</h5>
+                        <p>
+                            General Inquiries: <a href="mailto:info@chefconnect.com">info@chefmtaani.com</a><br>
+                            Support: <a href="mailto:support@chefconnect.com">support@chefmtaani.com</a><br>
+                            Chef Applications: <a href="mailto:chefs@chefconnect.com">chefs@chefmtaani.com</a>
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <h5><i class="fas fa-phone me-2 text-primary"></i>Phone</h5>
+                        <p>
+                            Main Office: +254 794 137 420<br>
+                            Chef Support: +254 794 137 420<br>
+                            Hours: Monday - Friday, 9:00 AM - 6:00 PM EAT
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <h5><i class="fas fa-map-marker-alt me-2 text-primary"></i>Address</h5>
+                        <p>
+                            ChefMtaani Headquarters<br>
+                            123 Culinary Lane<br>
+                            Nairobi, 00100<br>
+                            Kenya
+                        </p>
+                    </div>
+                    <div class="mb-4">
+                        <h5><i class="fas fa-share-alt me-2 text-primary"></i>Follow Us</h5>
+                        <p>
+                            <a href="#" class="me-3"><i class="fab fa-facebook fa-2x"></i></a>
+                            <a href="#" class="me-3"><i class="fab fa-instagram fa-2x"></i></a>
+                            <a href="#" class="me-3"><i class="fab fa-twitter fa-2x"></i></a>
+                            <a href="#"><i class="fab fa-linkedin fa-2x"></i></a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Chef Extranet Page -->
+    <div id="extranetPage" class="page" style="margin-top: 76px;">
+        <div class="container my-5 py-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <h2 class="text-center mb-4">Chef Extranet</h2>
+
+                    <div id="extranetNotice" class="alert alert-info mx-auto" style="display:none; max-width:760px;"></div>
+
+                    <!-- Logged out: login / sign up -->
+                    <div id="chefAuthBox" class="mx-auto" style="max-width:760px;">
+                        <ul class="nav nav-tabs mb-4" id="authTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button">Login</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="signup-tab" data-bs-toggle="tab" data-bs-target="#signup" type="button">Sign Up as a Chef</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="authTabContent">
+                            <div class="tab-pane fade show active" id="login" role="tabpanel">
+                                <div class="google-box" style="display:none">
+                                    <div id="googleBtnChef" class="d-flex justify-content-center"></div>
+                                    <div class="or-divider"><span>or use your email</span></div>
+                                </div>
+                                <form id="chefLoginForm">
+                                    <div class="mb-3">
+                                        <label for="loginEmail" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="loginEmail" autocomplete="username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="loginPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="loginPassword" autocomplete="current-password" required>
+                                        <div class="text-end mt-1"><a href="#" class="small" data-action="forgotPassword">Forgot password?</a></div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Login</button>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="signup" role="tabpanel">
+                                <form id="chefSignupForm">
+                                    <h5 class="mb-3">Personal Information</h5>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="signupFirstName" class="form-label">First Name</label>
+                                            <input type="text" class="form-control" id="signupFirstName" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="signupLastName" class="form-label">Last Name</label>
+                                            <input type="text" class="form-control" id="signupLastName" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="signupEmail" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="signupEmail" autocomplete="username" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="signupPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="signupPassword" minlength="6" autocomplete="new-password" required>
+                                        <div class="form-text">At least 6 characters.</div>
+                                    </div>
+
+                                    <h5 class="mb-3 mt-4">Where do you work?</h5>
+                                    <div class="mb-3">
+                                        <label for="signupCountry" class="form-label">Country</label>
+                                        <select class="form-select" id="signupCountry" required></select>
+                                        <div class="form-text">Your country sets your currency and the minimum hourly rate.</div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="signupCity" class="form-label">City / Town</label>
+                                            <input type="text" class="form-control" id="signupCity" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="signupRegion" class="form-label" id="signupRegionLabel">County</label>
+                                            <input type="text" class="form-control" id="signupRegion">
+                                        </div>
+                                    </div>
+
+                                    <h5 class="mb-3 mt-4">Professional Information</h5>
+                                    <div class="mb-3">
+                                        <label for="signupExperience" class="form-label">Years of Experience</label>
+                                        <input type="number" class="form-control" id="signupExperience" min="1" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="signupCuisine" class="form-label">Cuisine Specialization</label>
+                                        <select class="form-select" id="signupCuisine" required>
+                                            <option value="">Select your primary cuisine</option>
+                                            <option value="Italian">Italian</option>
+                                            <option value="French">French</option>
+                                            <option value="Asian">Asian Fusion</option>
+                                            <option value="Mexican">Mexican</option>
+                                            <option value="Indian">Indian</option>
+                                            <option value="Mediterranean">Mediterranean</option>
+                                            <option value="Kenyan">Kenyan</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="signupPrice" class="form-label" id="signupPriceLabel">Hourly Rate</label>
+                                        <input type="number" class="form-control" id="signupPrice" min="1" step="any" required>
+                                        <div class="form-text" id="signupPriceHint"></div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="signupBio" class="form-label">Professional Bio</label>
+                                        <textarea class="form-control" id="signupBio" rows="4" maxlength="500" placeholder="Tell us about your culinary background and expertise..." required></textarea>
+                                    </div>
+                                    <p class="text-muted small">After signing up you will complete your application: documents and a short live video interview with our team are required before your profile goes live.</p>
+                                    <button type="submit" class="btn btn-primary">Sign Up as Chef</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chef dashboard (shown after a chef logs in) -->
+                    <div id="chefDashboard" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                            <div>
+                                <h3 class="mb-1">Welcome, <span id="chefName"></span>!</h3>
+                                <span id="chefStatusBadge" class="badge"></span>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" data-action="logout">Logout</button>
+                        </div>
+
+                        <ul class="nav nav-tabs mb-3" id="chefTabs" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" id="tabApplicationBtn" data-bs-toggle="tab" data-bs-target="#tabApplication" type="button">Application</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tabBookingsBtn" data-bs-toggle="tab" data-bs-target="#tabBookings" type="button">Bookings <span id="pendingCount" class="badge bg-danger ms-1" style="display:none"></span></button></li>
+                            <li class="nav-item"><button class="nav-link" id="tabOrdersBtn" data-bs-toggle="tab" data-bs-target="#tabOrders" type="button">Orders <span id="pendingOrdersCount" class="badge bg-danger ms-1" style="display:none"></span></button></li>
+                            <li class="nav-item"><button class="nav-link" id="tabKitchenBtn" data-bs-toggle="tab" data-bs-target="#tabKitchen" type="button">Kitchen &amp; meals</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tabAvailabilityBtn" data-bs-toggle="tab" data-bs-target="#tabAvailability" type="button">Availability</button></li>
+                            <li class="nav-item"><button class="nav-link" id="tabProfileBtn" data-bs-toggle="tab" data-bs-target="#tabProfile" type="button">Profile</button></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="tabApplication"><div id="applicationPanel"></div></div>
+
+                            <div class="tab-pane fade" id="tabBookings"><div id="bookingsList"></div></div>
+
+                            <div class="tab-pane fade" id="tabOrders">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-0">Food orders</h5>
+                                    <button class="btn btn-sm btn-outline-secondary" data-action="refreshChefOrders"><i class="fas fa-rotate me-1"></i>Refresh</button>
+                                </div>
+                                <div id="chefOrdersList"></div>
+                            </div>
+
+                            <div class="tab-pane fade" id="tabKitchen"><div id="kitchenPanel"></div></div>
+
+                            <div class="tab-pane fade" id="tabAvailability">
+                                <div class="row g-4">
+                                    <div class="col-lg-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Working days and hours</h5>
+                                                <p class="text-muted small">Customers can only book you on these days and between these hours.</p>
+                                                <form id="workingHoursForm">
+                                                    <div class="d-flex flex-wrap gap-3 mb-3" id="weekdayChecks"></div>
+                                                    <div class="row g-2 mb-3">
+                                                        <div class="col-6">
+                                                            <label for="hoursStart" class="form-label">From</label>
+                                                            <input type="time" class="form-control" id="hoursStart" step="1800" required>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label for="hoursEnd" class="form-label">Until</label>
+                                                            <input type="time" class="form-control" id="hoursEnd" step="1800" required>
+                                                        </div>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary btn-sm">Save working hours</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="card mt-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Your calendar</h5>
+                                                <div id="chefCalendar" class="calendar-container"></div>
+                                                <div class="cal-legend mt-2">
+                                                    <span><i class="cal-dot cal-dot-booked"></i> Booking</span>
+                                                    <span><i class="cal-dot cal-dot-off"></i> Not available</span>
+                                                    <span><i class="cal-dot cal-dot-partial"></i> Part of the day</span>
+                                                </div>
+                                                <div class="form-text">Click a day to start a time-off period on that date.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Block time off</h5>
+                                                <p class="text-muted small">Set dates, or hours of the day, when you are not available. Customers will not be able to book you then.</p>
+                                                <form id="timeOffForm">
+                                                    <div class="row g-2 mb-2">
+                                                        <div class="col-6">
+                                                            <label for="toStart" class="form-label">From date</label>
+                                                            <input type="date" class="form-control" id="toStart" required>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label for="toEnd" class="form-label">To date</label>
+                                                            <input type="date" class="form-control" id="toEnd" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="toAllDay" checked>
+                                                        <label class="form-check-label" for="toAllDay">All day</label>
+                                                    </div>
+                                                    <div class="row g-2 mb-2" id="toTimes" style="display:none">
+                                                        <div class="col-6">
+                                                            <label for="toStartTime" class="form-label">From time</label>
+                                                            <input type="time" class="form-control" id="toStartTime" step="1800">
+                                                        </div>
+                                                        <div class="col-6">
+                                                            <label for="toEndTime" class="form-label">To time</label>
+                                                            <input type="time" class="form-control" id="toEndTime" step="1800">
+                                                        </div>
+                                                        <div class="col-12 form-text">The hours are blocked on every day of the period.</div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="toNote" class="form-label">Note to yourself (optional, private)</label>
+                                                        <input type="text" class="form-control" id="toNote" maxlength="200">
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary btn-sm">Block this time</button>
+                                                </form>
+                                                <div id="timeOffWarnings" class="mt-3"></div>
+                                            </div>
+                                        </div>
+                                        <div class="card mt-4">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Upcoming time off</h5>
+                                                <div id="timeOffList"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="tabProfile"><div id="profilePanel"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Login / Sign up Page -->
+    <div id="customerAuthPage" class="page" style="margin-top: 76px;">
+        <div class="container my-5 py-4">
+            <div class="mx-auto" style="max-width:560px;">
+                <h2 class="text-center mb-4">Welcome to ChefMtaani</h2>
+                <div class="google-box" style="display:none">
+                    <div id="googleBtnCustomer" class="d-flex justify-content-center"></div>
+                    <div class="or-divider"><span>or use your email</span></div>
+                </div>
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#custLogin" type="button">Log in</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#custRegister" type="button">Create account</button></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="custLogin">
+                        <form id="customerLoginForm">
+                            <div class="mb-3">
+                                <label for="custLoginEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="custLoginEmail" autocomplete="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="custLoginPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="custLoginPassword" autocomplete="current-password" required>
+                                <div class="text-end mt-1"><a href="#" class="small" data-action="forgotPassword">Forgot password?</a></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Log in</button>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="custRegister">
+                        <form id="customerRegisterForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="custFirstName" class="form-label">First name</label>
+                                    <input type="text" class="form-control" id="custFirstName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="custLastName" class="form-label">Last name</label>
+                                    <input type="text" class="form-control" id="custLastName" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="custEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="custEmail" autocomplete="username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="custPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="custPassword" minlength="6" autocomplete="new-password" required>
+                                <div class="form-text">At least 6 characters.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create account</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer dashboard: My Bookings -->
+    <div id="myBookingsPage" class="page" style="margin-top: 76px;">
+        <div class="container my-5 py-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h2 class="mb-0">My Orders &amp; Bookings</h2>
+                <div>
+                    <button class="btn btn-primary me-1" data-action="goPage" data-page="orderFoodPage"><i class="fas fa-bag-shopping me-2"></i>Order food</button>
+                    <button class="btn btn-outline-primary" data-action="goPage" data-page="cuisinesPage"><i class="fas fa-utensils me-2"></i>Book a chef visit</button>
+                </div>
+            </div>
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                <li class="nav-item"><button class="nav-link active" id="custTabBookingsBtn" data-bs-toggle="tab" data-bs-target="#custTabBookings" type="button">Chef visits</button></li>
+                <li class="nav-item"><button class="nav-link" id="custTabOrdersBtn" data-bs-toggle="tab" data-bs-target="#custTabOrders" type="button">Food orders <span id="activeOrdersCount" class="badge bg-primary ms-1" style="display:none"></span></button></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="custTabBookings"><div id="myBookingsList"></div></div>
+                <div class="tab-pane fade" id="custTabOrders">
+                    <div class="text-end mb-2"><button class="btn btn-sm btn-outline-secondary" data-action="refreshMyOrders"><i class="fas fa-rotate me-1"></i>Refresh</button></div>
+                    <div id="myOrdersList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin: chef applications -->
+    <div id="adminPage" class="page" style="margin-top: 76px;">
+        <div class="container my-5 py-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                <h2 class="mb-0">Chef applications</h2>
+                <button class="btn btn-outline-secondary btn-sm" data-action="refreshAdmin"><i class="fas fa-rotate me-1"></i>Refresh</button>
+            </div>
+            <p class="text-muted">Every chef must pass a live interview (call or video) before they can be approved. Steps: review the application, call the chef, record the result, then approve.</p>
+            <div id="adminChefList"></div>
+        </div>
+    </div>
+
+
+    <!-- Order food: find kitchens near you -->
+    <div id="orderFoodPage" class="page" style="margin-top: 76px;">
+        <div class="container my-4 py-3">
+            <h2 class="mb-1">Order food from a local chef</h2>
+            <p class="text-muted">Home-cooked meals from chefs in <strong id="orderCountryName">your country</strong>. Collect it yourself, or have a rider from Bolt, Uber or another delivery app bring it to you.</p>
+            <form id="kitchenSearchForm" class="row g-2 mb-4">
+                <div class="col-md-3"><label for="searchCity" class="form-label small mb-1">City / town</label><input type="text" class="form-control" id="searchCity" placeholder="e.g. Nairobi" maxlength="80"></div>
+                <div class="col-md-3"><label for="searchArea" class="form-label small mb-1">Neighbourhood (optional)</label><input type="text" class="form-control" id="searchArea" placeholder="e.g. Westlands" maxlength="80"></div>
+                <div class="col-md-3"><label for="searchCuisine" class="form-label small mb-1">Cuisine</label><select class="form-select" id="searchCuisine"><option value="">All cuisines</option></select></div>
+                <div class="col-md-2"><label for="searchDietary" class="form-label small mb-1">Diet</label><select class="form-select" id="searchDietary"><option value="">Any</option></select></div>
+                <div class="col-md-1 d-flex align-items-end"><button type="submit" class="btn btn-primary w-100"><i class="fas fa-search"></i></button></div>
+            </form>
+            <div id="kitchenList" class="row g-3"></div>
+        </div>
+    </div>
+
+    <!-- A kitchen's menu + cart -->
+    <div id="kitchenPage" class="page" style="margin-top: 76px;">
+        <div class="container my-4">
+            <button class="btn btn-link px-0 mb-2" data-action="goPage" data-page="orderFoodPage"><i class="fas fa-arrow-left me-1"></i>All kitchens</button>
+            <div id="kitchenBody"></div>
+        </div>
+    </div>
+
+    <!-- Email confirmation (the page the emailed link opens) -->
+    <div id="verifyEmailPage" class="page" style="margin-top: 76px;">
+        <div class="container my-5 py-5">
+            <div id="verifyResult" class="text-center mx-auto" style="max-width:480px;"></div>
+        </div>
+    </div>
+
+    <!-- Reset password (the page the emailed link opens) -->
+    <div id="resetPasswordPage" class="page" style="margin-top: 76px;">
+        <div class="container my-5 py-4">
+            <div class="mx-auto" style="max-width:480px;">
+                <h2 class="text-center mb-2">Choose a new password</h2>
+                <p class="text-center text-muted">Enter a new password for your ChefMtaani account.</p>
+                <form id="resetForm">
+                    <div class="mb-3">
+                        <label for="resetPassword" class="form-label">New password</label>
+                        <input type="password" class="form-control" id="resetPassword" minlength="6" autocomplete="new-password" required>
+                        <div class="form-text">At least 6 characters.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="resetPassword2" class="form-label">Repeat the new password</label>
+                        <input type="password" class="form-control" id="resetPassword2" minlength="6" autocomplete="new-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save password and sign in</button>
+                </form>
+                <div id="resetExpired" class="alert alert-warning mt-3" style="display:none">
+                    This link is no longer valid. <a href="#" data-action="forgotPassword">Send me a new link</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5>About ChefMtaani</h5>
+                    <p>Bringing professional chefs to your home for unforgettable culinary experiences. Experience restaurant-quality dining in the comfort of your own space.</p>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" onclick="showPage('homePage')">Home</a></li>
+                        <li><a href="#" onclick="showPage('cuisinesPage')">Browse Cuisines</a></li>
+                        <li><a href="#" onclick="showPage('aboutPage')">About Us</a></li>
+                        <li><a href="#" onclick="showPage('contactPage')">Contact</a></li>
+                        <li><a href="#" onclick="showPage('extranetPage')">Chef Extranet</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5>Connect With Us</h5>
+                    <p>Stay updated with our latest chefs and culinary experiences</p>
+                    <div class="d-flex gap-3">
+                        <a href="#"><i class="fab fa-facebook fa-2x"></i></a>
+                        <a href="#"><i class="fab fa-instagram fa-2x"></i></a>
+                        <a href="#"><i class="fab fa-twitter fa-2x"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-4">
+            <div class="text-center py-3">
+                <p>&copy; 2024 ChefMtaani. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Booking Modal -->
+    <div class="modal fade" id="bookingModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Book Chef <span id="modalChefName"></span> <small class="ms-2 opacity-75" id="modalChefRate"></small></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <h6>1. Pick a date</h6>
+                            <div id="bookingCalendar" class="calendar-container"></div>
+                            <div class="cal-legend mt-2">
+                                <span><i class="cal-dot cal-dot-free"></i> Available</span>
+                                <span><i class="cal-dot cal-dot-partial"></i> Some times taken</span>
+                                <span><i class="cal-dot cal-dot-off"></i> Unavailable</span>
+                            </div>
+                            <div id="chefTimeOffInfo" class="mt-3"></div>
+                        </div>
+                        <div class="col-lg-7">
+                            <form id="bookingForm" novalidate>
+                                <h6>2. Choose a time</h6>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-7">
+                                        <label for="bookingDate" class="form-label">Selected date</label>
+                                        <input type="text" class="form-control" id="bookingDate" placeholder="Pick a date in the calendar" readonly>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <label for="bookingDuration" class="form-label">Duration</label>
+                                        <select class="form-select" id="bookingDuration">
+                                            <option value="2">2 hours</option><option value="3" selected>3 hours</option><option value="4">4 hours</option>
+                                            <option value="5">5 hours</option><option value="6">6 hours</option><option value="7">7 hours</option><option value="8">8 hours</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="slotMessage" class="text-muted small mb-2">Pick a date to see the available times.</div>
+                                <div id="slotPicker" class="slot-grid mb-3"></div>
+
+                                <h6 class="mt-3">3. Where should the chef come?</h6>
+                                <div class="mb-2">
+                                    <label for="addrStreet" class="form-label">Street / building / estate</label>
+                                    <input type="text" class="form-control" id="addrStreet" maxlength="150">
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-6">
+                                        <label for="addrCity" class="form-label">City / Town</label>
+                                        <input type="text" class="form-control" id="addrCity" maxlength="80">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="addrRegion" class="form-label" id="addrRegionLabel">County</label>
+                                        <input type="text" class="form-control" id="addrRegion" maxlength="80">
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-6">
+                                        <label for="addrPostal" class="form-label" id="addrPostalLabel">Postal code</label>
+                                        <input type="text" class="form-control" id="addrPostal" maxlength="20">
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="addrCountry" class="form-label">Country</label>
+                                        <input type="text" class="form-control" id="addrCountry" readonly>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-2">
+                                    <div class="col-sm-4">
+                                        <label for="bookingGuests" class="form-label">Guests</label>
+                                        <input type="number" class="form-control" id="bookingGuests" min="1" max="50" value="4">
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <label for="bookingNotes" class="form-label">Special requests (optional)</label>
+                                        <input type="text" class="form-control" id="bookingNotes" maxlength="1000">
+                                    </div>
+                                </div>
+                                <div id="bookingSummary" class="booking-summary mt-3"></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-action="confirmBooking">Send booking request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decline / cancel a booking (chef) -->
+    <div class="modal fade" id="rejectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="rejectForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectTitle">Decline booking</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="rejectBookingId"><input type="hidden" id="rejectStatus">
+                    <p class="text-muted small">The customer will be told your reason.</p>
+                    <div class="mb-3">
+                        <label for="rejectReason" class="form-label">Reason</label>
+                        <select class="form-select" id="rejectReason" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="rejectNote" class="form-label">Short message to the customer (optional)</label>
+                        <textarea class="form-control" id="rejectNote" rows="2" maxlength="300"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                    <button type="submit" class="btn btn-danger" id="rejectSubmit">Decline booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Review (customer) -->
+    <div class="modal fade" id="reviewModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="reviewForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Rate your chef</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="reviewBookingId">
+                    <div class="mb-3">
+                        <label for="reviewScore" class="form-label">Rating</label>
+                        <select class="form-select" id="reviewScore" required>
+                            <option value="5">5 - Excellent</option><option value="4">4 - Very good</option><option value="3">3 - Good</option>
+                            <option value="2">2 - Fair</option><option value="1">1 - Poor</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reviewText" class="form-label">Your review</label>
+                        <textarea class="form-control" id="reviewText" rows="3" maxlength="1000" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin: schedule the live interview -->
+    <div class="modal fade" id="scheduleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="scheduleForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule live interview</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="schedChefId">
+                    <div id="schedChefInfo" class="mb-3"></div>
+                    <div class="mb-3">
+                        <label for="schedWhen" class="form-label">Date and time</label>
+                        <input type="datetime-local" class="form-control" id="schedWhen" required>
+                        <div class="form-text">Your local time. The chef is emailed the time (in their own time zone).</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="schedLink" class="form-label">Video meeting link (optional)</label>
+                        <input type="url" class="form-control" id="schedLink" placeholder="https://meet.google.com/...">
+                        <div class="form-text">Leave empty to interview by phone call instead.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule and email the chef</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin: record the interview result -->
+    <div class="modal fade" id="interviewDoneModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="interviewDoneForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Record interview result</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="ivChefId">
+                    <div id="ivChefInfo" class="mb-3"></div>
+                    <div class="mb-3">
+                        <div class="form-check"><input class="form-check-input" type="radio" name="ivPassed" id="ivPassedYes" value="yes" checked><label class="form-check-label" for="ivPassedYes">Passed - can be approved</label></div>
+                        <div class="form-check"><input class="form-check-input" type="radio" name="ivPassed" id="ivPassedNo" value="no"><label class="form-check-label" for="ivPassedNo">Failed - reject the application</label></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ivNotes" class="form-label">Private notes (only admins see these)</label>
+                        <textarea class="form-control" id="ivNotes" rows="2" maxlength="2000"></textarea>
+                    </div>
+                    <div class="mb-3" id="ivReasonBox" style="display:none">
+                        <label for="ivReason" class="form-label">Message to the chef (emailed)</label>
+                        <textarea class="form-control" id="ivReason" rows="2" maxlength="1000"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save result</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin: reject an application -->
+    <div class="modal fade" id="adminRejectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="adminRejectForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject application</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="arChefId">
+                    <label for="arReason" class="form-label">Reason (emailed to the chef)</label>
+                    <textarea class="form-control" id="arReason" rows="3" maxlength="1000" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Reject application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Checkout (customer) -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <form class="modal-content" id="checkoutForm" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title">Checkout <small class="ms-2 opacity-75" id="coKitchen"></small></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="coSummary" class="booking-summary mb-3"></div>
+                    <h6>How do you want to receive it?</h6>
+                    <div class="mb-2" id="coFulfilmentBox">
+                        <div class="form-check" id="coDeliveryWrap"><input class="form-check-input" type="radio" name="coFulfilment" id="coDelivery" value="delivery" checked><label class="form-check-label" for="coDelivery">Delivery by a rider (Bolt, Uber or another delivery app)</label></div>
+                        <div class="form-check" id="coPickupWrap"><input class="form-check-input" type="radio" name="coFulfilment" id="coPickup" value="pickup"><label class="form-check-label" for="coPickup">I will collect it myself</label></div>
+                    </div>
+                    <div id="coCourierNote" class="small text-muted mb-3"></div>
+                    <h6>Your phone number</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-5 col-md-4"><select class="form-select" id="coDial" aria-label="Country code"></select></div>
+                        <div class="col-7 col-md-8"><input type="tel" class="form-control" id="coPhone" placeholder="712 345 678" inputmode="tel"></div>
+                    </div>
+                    <div id="coDeliveryBox">
+                        <h6>Delivery address</h6>
+                        <div class="mb-2"><label for="coStreet" class="form-label small mb-1">Street / building / estate</label><input type="text" class="form-control" id="coStreet" maxlength="150"></div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-sm-6"><label for="coArea" class="form-label small mb-1">Neighbourhood</label><input type="text" class="form-control" id="coArea" maxlength="80"></div>
+                            <div class="col-sm-6"><label for="coCity" class="form-label small mb-1">City / town</label><input type="text" class="form-control" id="coCity" maxlength="80"></div>
+                        </div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-sm-6"><label for="coRegion" class="form-label small mb-1" id="coRegionLabel">County</label><input type="text" class="form-control" id="coRegion" maxlength="80"></div>
+                            <div class="col-sm-6"><label for="coPostal" class="form-label small mb-1" id="coPostalLabel">Postal code</label><input type="text" class="form-control" id="coPostal" maxlength="20"></div>
+                        </div>
+                        <div class="mb-3"><label for="coInstructions" class="form-label small mb-1">Directions for the rider (optional)</label><input type="text" class="form-control" id="coInstructions" maxlength="200" placeholder="e.g. Blue gate, call when outside"></div>
+                    </div>
+                    <div class="mb-2"><label for="coNotes" class="form-label small mb-1">Anything the chef should know? (optional)</label><textarea class="form-control" id="coNotes" rows="2" maxlength="500" placeholder="Allergies, less pepper, ..."></textarea></div>
+                    <p class="small text-muted mb-0">Payment is arranged directly with the chef. Any rider fee is paid to the delivery service.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back to menu</button>
+                    <button type="submit" class="btn btn-primary">Place order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add / edit a meal (chef) -->
+    <div class="modal fade" id="mealModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <form class="modal-content" id="mealForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mealTitle">Add a meal</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="mealId">
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-8"><label for="mealName" class="form-label small mb-1">Meal name</label><input type="text" class="form-control" id="mealName" maxlength="80" required></div>
+                        <div class="col-md-4"><label for="mealPrice" class="form-label small mb-1" id="mealPriceLabel">Price</label><input type="number" class="form-control" id="mealPrice" min="1" step="any" required></div>
+                    </div>
+                    <div class="mb-2"><label for="mealDesc" class="form-label small mb-1">Description (what is in it, how it is served)</label><textarea class="form-control" id="mealDesc" rows="2" maxlength="300"></textarea></div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4"><label for="mealCategory" class="form-label small mb-1">Category</label><select class="form-select" id="mealCategory"></select></div>
+                        <div class="col-md-4"><label for="mealCuisine" class="form-label small mb-1">Cuisine</label><select class="form-select" id="mealCuisine"></select></div>
+                        <div class="col-md-4"><label for="mealPortion" class="form-label small mb-1">Portion (optional)</label><input type="text" class="form-control" id="mealPortion" maxlength="40" placeholder="e.g. Serves 2"></div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4"><label for="mealPrep" class="form-label small mb-1">Preparation time (minutes)</label><input type="number" class="form-control" id="mealPrep" min="5" max="240" value="30"></div>
+                        <div class="col-md-8"><label class="form-label small mb-1">Good to know</label><div id="mealDietary" class="d-flex flex-wrap gap-3"></div></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mealPhoto" class="form-label small mb-1">Photo (optional)</label>
+                        <div class="d-flex align-items-center gap-3">
+                            <img id="mealPhotoPreview" class="meal-photo" alt="Meal photo preview" style="display:none">
+                            <div class="flex-grow-1">
+                                <input type="file" class="form-control" id="mealPhoto" accept="image/jpeg,image/png,image/webp">
+                                <div class="form-text">A clear, well-lit photo sells best. We shrink it and remove hidden location data automatically.</div>
+                                <div class="form-check mt-1" id="mealPhotoRemoveWrap" style="display:none"><input class="form-check-input" type="checkbox" id="mealPhotoRemove"><label class="form-check-label small" for="mealPhotoRemove">Remove the current photo</label></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-check"><input class="form-check-input" type="checkbox" id="mealAvailable" checked><label class="form-check-label" for="mealAvailable">Available to order now</label></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save meal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Meal photo, enlarged -->
+    <div class="modal fade" id="photoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-body p-2 text-center">
+                    <img id="photoModalImg" class="img-fluid rounded" alt="">
+                    <div id="photoModalCaption" class="mt-2 fw-bold"></div>
+                </div>
+                <div class="modal-footer py-1"><button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accept a food order (chef) -->
+    <div class="modal fade" id="acceptOrderModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="acceptOrderForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Accept order <span id="acceptCode"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="acceptOrderId">
+                    <label for="acceptMinutes" class="form-label">When will it be ready?</label>
+                    <select class="form-select" id="acceptMinutes"></select>
+                    <div class="form-text">The customer is emailed this time. After you accept you see their phone number and address.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                    <button type="submit" class="btn btn-success">Accept order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Decline / cancel a food order (chef) -->
+    <div class="modal fade" id="orderRejectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="orderRejectForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderRejectTitle">Decline order</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="orRejectId"><input type="hidden" id="orRejectStatus">
+                    <div class="mb-3"><label for="orRejectReason" class="form-label">Reason</label><select class="form-select" id="orRejectReason"></select></div>
+                    <div class="mb-3"><label for="orRejectNote" class="form-label">Short message to the customer (optional)</label><textarea class="form-control" id="orRejectNote" rows="2" maxlength="300"></textarea></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Back</button>
+                    <button type="submit" class="btn btn-danger" id="orRejectSubmit">Decline order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rider details (chef or customer, whoever books the rider) -->
+    <div class="modal fade" id="courierModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="courierForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Rider details <span id="courierCode"></span></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="courierOrderId"><input type="hidden" id="courierDial">
+                    <p class="small text-muted">Book the rider in the delivery app, then note who is coming so everyone can follow the delivery.</p>
+                    <div class="mb-2"><label for="courierService" class="form-label small mb-1">Delivery app</label><select class="form-select" id="courierService" required></select></div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6"><label for="courierRider" class="form-label small mb-1">Rider name (optional)</label><input type="text" class="form-control" id="courierRider" maxlength="60"></div>
+                        <div class="col-md-6"><label for="courierPhone" class="form-label small mb-1">Rider phone (optional)</label><input type="tel" class="form-control" id="courierPhone" placeholder="+254712345678"></div>
+                    </div>
+                    <div class="mb-2"><label for="courierLink" class="form-label small mb-1">Tracking link (optional, https://)</label><input type="url" class="form-control" id="courierLink" maxlength="300"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save rider details</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot password -->
+    <div class="modal fade" id="forgotModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="forgotForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Forgot your password?</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Enter the email address of your account and we will send you a link to choose a new password.</p>
+                    <label for="forgotEmail" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="forgotEmail" autocomplete="username" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send reset link</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google: link to an existing password account -->
+    <div class="modal fade" id="googleLinkModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" id="googleLinkForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Connect your Google account</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>You already have a ChefMtaani account with <strong id="googleLinkEmail"></strong>. To make sure it is really you, enter that account's password <em>once</em>. After this you can sign in with Google or with your password.</p>
+                    <label for="googleLinkPassword" class="form-label">Account password</label>
+                    <input type="password" class="form-control" id="googleLinkPassword" autocomplete="current-password" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Connect and sign in</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reminder shown to logged-in people whose email is not confirmed yet -->
+    <div id="verifyBanner" class="verify-banner" style="display:none">
+        <span><i class="fas fa-envelope me-2"></i>Please confirm your email address. We sent a link to <strong id="verifyBannerEmail"></strong>.</span>
+        <button type="button" class="btn btn-sm btn-light ms-3" data-action="resendVerification">Resend email</button>
+    </div>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastBox" style="z-index:2000; margin-top:70px;"></div>
+
+    <script src="/api.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="/script.js" defer></script>
+
+</body>
+</html>

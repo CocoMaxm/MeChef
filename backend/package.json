@@ -1,0 +1,41 @@
+{
+  "name": "chefmtaani",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node seeders/seeder.js",
+    "seed:delete": "node seeders/seeder.js -d",
+    "create-admin": "node scripts/createAdmin.js",
+    "migrate": "node scripts/migrateData.js",
+    "test:flow": "node scripts/smokeTest.js",
+    "verify-existing": "node scripts/verifyExistingUsers.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "express-validator": "^7.2.1",
+    "google-auth-library": "^11.3.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.17.1",
+    "multer": "^2.0.2",
+    "nodemailer": "^10.1.7",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  },
+  "description": "",
+  "engines": {
+    "node": ">=20.13.0"
+  }
+}
