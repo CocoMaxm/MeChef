@@ -32,7 +32,7 @@ const fail = (res, status, error) => res.status(status).json({ success: false, e
 // @route POST /api/bookings  (private, customer)
 exports.createBooking = async (req, res, next) => {
     try {
-        const { chefId, date, startTime, duration, numberOfGuests, address, specialRequests } = req.body;
+        const { chefId, date, startTime, duration, numberOfGuests, address, specialRequests, menuType } = req.body;
 
         const day = toDay(date);
         if (!day) return fail(res, 400, 'Valid date is required');
@@ -106,6 +106,7 @@ exports.createBooking = async (req, res, next) => {
                 zipCode: String(address.zipCode || '').trim(),
                 country: country.code
             },
+            menuType: ['chef-choice', 'custom', 'pre-set'].includes(menuType) ? menuType : 'chef-choice',
             specialRequests,
             totalPrice
         });

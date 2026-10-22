@@ -34,7 +34,7 @@ const state = {
     reasonCodes: [],
     myBookings: [], chefBookings: [], timeOff: [],
     meta: null, kitchens: [], currentKitchen: null, cart: { chefId: null, items: {} }, myOrders: [], chefOrders: [], kitchenSettings: null, meals: [],
-    adminChefs: [],
+    adminChefs: [], savedItems: null, discoveryObserver: null,
     chefCal: { year: null, month: null }
 };
 
@@ -150,7 +150,9 @@ function setSession(token, user) { sessionId++; localStorage.setItem('authToken'
 // Wipe everything the previous user could see, so nothing leaks to the next person on this device
 function resetViews() {
     ['applicationPanel', 'bookingsList', 'profilePanel', 'timeOffList', 'chefCalendar', 'timeOffWarnings',
-     'myBookingsList', 'adminChefList', 'weekdayChecks', 'chefTimeOffInfo', 'myOrdersList', 'chefOrdersList', 'kitchenPanel'].forEach((id) => { const el = $(id); if (el) el.innerHTML = ''; });
+     'myBookingsList', 'adminChefList', 'weekdayChecks', 'chefTimeOffInfo', 'myOrdersList', 'chefOrdersList', 'kitchenPanel',
+     'chefStoriesPanel', 'savedChefsList', 'savedDishesList'].forEach((id) => { const el = $(id); if (el) el.innerHTML = ''; });
+    if (state.discoveryObserver) state.discoveryObserver.disconnect();
     $('pendingCount').style.display = 'none';
     $('pendingOrdersCount').style.display = 'none';
     $('activeOrdersCount').style.display = 'none';
@@ -255,6 +257,8 @@ function setCountry(code) {
         if (state.cuisine) showChefs(state.cuisine);
     }
     if ($('orderFoodPage').style.display === 'block') searchKitchens();
+    if ($('homePage').style.display === 'block') loadFeaturedChefs();
+    if ($('discoveryPage').style.display === 'block') { if ($('discoveryChef')) $('discoveryChef').dataset.loaded = 'false'; loadDiscoveryOptions(); loadDiscoveryFeed(); }
 }
 
 // Is the logged-in user of the right kind? If not, send them to log in.
@@ -272,6 +276,7 @@ function requireRole(role) {
 }
 
 function showPage(pageId) {
+    if (state.discoveryObserver) { state.discoveryObserver.disconnect(); document.querySelectorAll('.page video').forEach((video) => video.pause()); }
     document.querySelectorAll('.page').forEach((p) => { p.style.display = 'none'; });
     $(pageId).style.display = 'block';
     window.scrollTo(0, 0);
@@ -279,10 +284,13 @@ function showPage(pageId) {
     if (nav && nav.classList.contains('show') && window.bootstrap) bootstrap.Collapse.getOrCreateInstance(nav).hide();
 
     if (pageId === 'cuisinesPage') loadCuisineStats();
+    if (pageId === 'homePage') loadFeaturedChefs();
     if (pageId === 'orderFoodPage') loadOrderFoodPage();
     if (pageId === 'myBookingsPage' && requireRole('customer')) loadMyBookings();
     if (pageId === 'extranetPage') renderExtranet();
     if (pageId === 'adminPage' && requireRole('admin')) loadAdminPage();
+    if (pageId === 'discoveryPage') { loadDiscoveryOptions(); const postId = state.openPostId; state.openPostId = null; loadDiscoveryFeed(postId ? {} : discoveryParams(), postId || ''); }
+    if (pageId === 'myBookingsPage' && state.user?.role === 'customer') loadSavedItems();
 }
 
 /* ---------------------------- 3. browsing chefs --------------------------- */
@@ -290,13 +298,13 @@ async function loadCuisineStats() {
     const c = getCountry();
     try {
         const r = await api.cuisines.getAll({ country: c.code });
-        const byName = Object.fromEntries(r.data.map((x) => [x.name, x]));
+        const byName = Object.fromEntries(r.data.map((x) => [x.name.toLowerCase(), x]));
         document.querySelectorAll('.cuisine-card').forEach((card) => {
             const m = (card.getAttribute('onclick') || '').match(/showChefs\('([^']+)'\)/);
             const label = card.querySelector('small');
             if (!m || !label) return;
-            const info = byName[m[1]];
-            label.textContent = info ? `${info.chefCount} chef${info.chefCount === 1 ? '' : 's'} in ${c.name}` : `No chefs yet in ${c.name}`;
+            const info = byName[m[1].toLowerCase()];
+            label.textContent = info ? `${info.chefCount} chef${info.chefCount === 1 ? '' : 's'} in ${c.name}` : `Explore chefs in ${c.name}`;
         });
     } catch (e) { /* keep the default text */ }
 }
@@ -304,10 +312,16 @@ async function loadCuisineStats() {
 async function showChefs(cuisine) {
     state.cuisine = cuisine;
     const c = getCountry();
+    showPage('cuisinesPage');
     document.querySelector('#cuisinesPage section.container').style.display = 'none';
     $('chefDisplaySection').style.display = 'block';
     $('selectedCuisineTitle').textContent = `${cuisine} chefs in ${c.name}`;
     $('chefsList').innerHTML = '<div class="text-center text-muted py-5">Loading chefs…</div>';
+    $('cuisinePostSection').style.display = 'block'; $('cuisinePostTitle').textContent = cuisine;
+    api.discovery.posts({ cuisine, country: c.code }).then((posts) => {
+        $('cuisinePostFeed').innerHTML = posts.data.length ? posts.data.map(postMarkup).join('') : '<div class="text-muted">No cooking stories in this cuisine yet.</div>';
+        observeStoryVideos($('cuisinePostFeed'));
+    }).catch(() => { $('cuisinePostFeed').innerHTML = '<div class="text-muted">Stories could not be loaded.</div>'; });
     const r = await guard(() => api.chefs.getAll({ cuisine, country: c.code }));
     state.chefs = r ? r.data : [];
     displayChefs();
@@ -317,6 +331,7 @@ function hideChefs() {
     state.cuisine = null;
     document.querySelector('#cuisinesPage section.container').style.display = 'block';
     $('chefDisplaySection').style.display = 'none';
+    $('cuisinePostSection').style.display = 'none';
 }
 
 function displayChefs() {
@@ -330,24 +345,54 @@ function displayChefs() {
         const u = chef.user || {};
         const loc = [chef.serviceLocation.city, chef.serviceLocation.state].filter(Boolean).join(', ');
         const rating = chef.rating && chef.rating.count
-            ? `${stars(chef.rating.average)} <small class="text-muted">${esc(chef.rating.average)} (${esc(chef.rating.count)})</small>`
+            ? `<span class="chef-rating">${stars(chef.rating.average)}</span> <small class="text-muted">${esc(chef.rating.average)} (${esc(chef.rating.count)} reviews)</small>`
             : '<small class="text-muted">New chef</small>';
-        return `<div class="col-lg-6"><div class="chef-card">
-            <div class="d-flex">
-                <img src="https://i.pravatar.cc/80?u=${esc(chef._id)}" alt="" class="chef-avatar me-3">
-                <div class="flex-grow-1">
-                    <h5 class="mb-1">${esc(u.firstName)} ${esc(u.lastName)}</h5>
-                    <div class="mb-1">${rating}</div>
-                    <p class="mb-1 text-muted small"><i class="fas fa-map-marker-alt me-1"></i>${esc(loc)} &middot; ${esc(chef.experience)} years experience</p>
-                    <p class="mb-2">${esc(chef.bio)}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <strong>${esc(money(chef.hourlyRate, c))}/hour</strong>
-                        <button class="btn btn-primary btn-sm" data-action="bookChef" data-id="${esc(chef._id)}">Book now</button>
-                    </div>
-                </div>
-            </div>
-        </div></div>`;
+        const specialties = [chef.cuisineSpecialization, ...(chef.additionalCuisines || [])].filter(Boolean).map(esc).join(' · ');
+        const photo = chef.profileImage ? `<img src="${esc(chef.profileImage)}" alt="Chef ${esc(u.firstName)}" class="discovery-chef-photo" loading="lazy">` : `<div class="discovery-chef-initial">${esc((u.firstName || 'C').charAt(0).toUpperCase())}</div>`;
+        const signatureDishes = (chef.signatureDishes || []).slice(0, 3);
+        return `<div class="col-lg-6"><article class="chef-card discovery-chef-card">
+            <div class="discovery-chef-top">${photo}<div class="flex-grow-1"><div class="discovery-chef-specialty">${specialties}</div><h3>${esc(u.firstName)} ${esc(u.lastName)}</h3><div class="mb-2">${rating}</div><p class="mb-0 text-muted small"><i class="fas fa-location-dot me-1"></i>${esc(loc)} <span class="mx-1">·</span> ${esc(chef.experience)} years experience</p></div></div>
+            <p class="discovery-chef-bio">${esc(chef.bio)}</p>
+            <div class="discovery-chef-menu"><i class="fas fa-wand-magic-sparkles"></i><span>${signatureDishes.length ? `<strong>Signature dishes:</strong> ${signatureDishes.map(esc).join(' · ')}` : 'Custom menus welcome — share your favourite dishes with your chef.'}</span></div>
+            <div class="discovery-chef-footer"><strong>${esc(money(chef.hourlyRate, c))}<small> / hour</small></strong><div class="d-flex gap-2"><button class="btn btn-outline-primary btn-sm" data-action="openChefProfile" data-id="${esc(chef._id)}">Meet chef</button><button class="btn btn-primary btn-sm" data-action="bookChef" data-id="${esc(chef._id)}">Book <i class="fas fa-arrow-right ms-1"></i></button></div></div>
+        </article></div>`;
     }).join('');
+}
+
+async function loadFeaturedChefs() {
+    const grid = $('homeChefCards');
+    if (!grid) return;
+    grid.innerHTML = '<div class="chef-loading"><span class="spinner-border spinner-border-sm me-2"></span>Finding chefs near you…</div>';
+    try {
+        const r = await api.chefs.getAll({ country: getCountry().code, sortBy: 'rating' });
+        const chefs = r.data.slice(0, 3);
+        if (!chefs.length) {
+            grid.innerHTML = `<div class="chef-empty"><i class="fas fa-utensils mb-2"></i><div>Chef profiles for ${esc(getCountry().name)} are coming soon.</div><small>Explore cuisines or check another location.</small></div>`;
+            return;
+        }
+        grid.innerHTML = chefs.map((chef) => {
+            const u = chef.user || {};
+            const country = getCountry(chef.serviceLocation && chef.serviceLocation.country);
+            const name = `${u.firstName || 'Chef'} ${u.lastName || ''}`.trim();
+            const initials = `${(u.firstName || 'C').charAt(0)}${(u.lastName || '').charAt(0)}`.toUpperCase();
+            const specialties = [chef.cuisineSpecialization, ...(chef.additionalCuisines || [])].filter(Boolean);
+            const rating = chef.rating && chef.rating.count
+                ? `<span><i class="fas fa-star"></i> ${esc(chef.rating.average)}</span> <small>(${esc(chef.rating.count)} reviews)</small>`
+                : '<small>New chef</small>';
+            const dishes = (chef.signatureDishes || []).slice(0, 2);
+            const photo = chef.profileImage
+                ? `<img src="${esc(chef.profileImage)}" alt="${esc(name)}" loading="lazy">`
+                : `<div class="home-chef-initial" aria-label="${esc(name)}">${esc(initials)}</div>`;
+            return `<article class="home-chef-card"><div class="home-chef-photo">${photo}<span class="home-chef-verified"><i class="fas fa-circle-check"></i> Verified chef</span></div>
+                <div class="home-chef-body"><div class="home-chef-top"><div><h3>${esc(name)}</h3><div class="home-chef-specialty">${esc(specialties.slice(0, 2).join(' · '))}</div></div><div class="home-chef-rating">${rating}</div></div>
+                <p class="home-chef-bio">${esc(chef.bio || 'A professional chef ready to create a personal dining experience in your space.')}</p>
+                ${dishes.length ? `<div class="home-chef-dishes"><i class="fas fa-utensils"></i><span>${dishes.map(esc).join(' · ')}</span></div>` : ''}
+                <div class="home-chef-meta"><span><i class="fas fa-location-dot"></i>${esc(chef.serviceLocation?.city || country.name)}</span><span><i class="fas fa-briefcase"></i>${esc(chef.experience)} years</span><span><i class="fas fa-house"></i>Cooks at your place</span></div>
+                <div class="home-chef-bottom"><div class="home-chef-price">${esc(money(chef.hourlyRate, country))}<small> / hour</small></div><button class="btn btn-primary home-chef-book" data-action="openChefProfile" data-id="${esc(chef._id)}">Meet ${esc(u.firstName || 'chef')} <i class="fas fa-arrow-right ms-1"></i></button></div></div></article>`;
+        }).join('');
+    } catch (e) {
+        grid.innerHTML = '<div class="chef-empty">Chef profiles could not be loaded right now. Please try again in a moment.</div>';
+    }
 }
 
 /* -------------------------- Google sign-in (optional) -------------------------- */
@@ -463,7 +508,9 @@ const formHandlers = {
             firstName: $('signupFirstName').value.trim(), lastName: $('signupLastName').value.trim(),
             email: $('signupEmail').value.trim(), password: $('signupPassword').value,
             bio: $('signupBio').value.trim(), experience: Number($('signupExperience').value),
-            cuisineSpecialization: $('signupCuisine').value, hourlyRate: rate,
+            cuisineSpecialization: $('signupCuisine').value,
+            additionalCuisines: $('signupAdditionalCuisines').value.split(',').map((item) => item.trim()).filter(Boolean),
+            signatureDishes: $('signupSignatureDishes').value.split(',').map((item) => item.trim()).filter(Boolean), hourlyRate: rate,
             serviceLocation: { country: c.code, city: $('signupCity').value.trim(), state: $('signupRegion').value.trim() }
         }));
         if (!r) return;
@@ -500,8 +547,13 @@ function startBooking(chefId) {
 }
 
 async function openBooking(chefId) {
-    const chef = state.chefs.find((c) => c._id === chefId);
-    if (!chef) return;
+    let chef = state.chefs.find((c) => c._id === chefId) || (state.currentProfileChef?._id === chefId ? state.currentProfileChef : null);
+    if (!chef) {
+        const fetched = await guard(() => api.chefs.getById(chefId));
+        if (!fetched) return;
+        chef = fetched.data;
+        state.chefs.push(chef);
+    }
     const c = getCountry(chef.serviceLocation && chef.serviceLocation.country);
     const today = todayIn(c.timezone);
     const [ty, tm] = today.split('-').map(Number);
@@ -665,10 +717,15 @@ async function confirmBooking() {
     if (!(guests >= 1 && guests <= 50)) problems.push('Guests must be between 1 and 50.');
     if (problems.length) { notify(problems[0], 'warning'); return; }
 
+    const occasion = v('bookingOccasion');
+    const menuPreference = v('bookingMenuType');
+    const menuType = menuPreference === 'Custom menu' ? 'custom' : menuPreference === 'I have dishes in mind' ? 'pre-set' : 'chef-choice';
+    const notes = v('bookingNotes');
+    const specialRequests = [`Occasion: ${occasion}`, `Menu preference: ${menuPreference}`, notes ? `Guest notes: ${notes}` : ''].filter(Boolean).join('\n');
     const r = await guard(() => api.bookings.create({
         chefId: b.chef._id, date: b.date, startTime: b.slot, duration: b.duration, numberOfGuests: guests,
         address: { street: v('addrStreet'), city: v('addrCity'), state: v('addrRegion'), zipCode: v('addrPostal'), country: c.code },
-        specialRequests: v('bookingNotes') || undefined
+        menuType, specialRequests
     }), {
         // someone else took the slot a moment ago: refresh what the customer sees
         onError: async (err) => { if (err.status === 409) { b.avail = {}; await renderBookingCalendar(); await loadSlots(); } }
@@ -853,6 +910,7 @@ async function loadChefDashboard(pickTab = false) {
     renderKitchenPanel();
     renderAvailability();
     renderProfile();
+    loadChefStories();
     if (pickTab) bootstrap.Tab.getOrCreateInstance($(state.chef.isVerified ? 'tabBookingsBtn' : 'tabApplicationBtn')).show();
 }
 
@@ -1146,6 +1204,8 @@ function renderProfile() {
         <h5 class="card-title">Your public profile</h5>
         <p class="text-muted small">Country: <strong>${esc(c.name)}</strong> (prices in ${esc(c.currency)}). To change your country, contact support.</p>
         <div class="mb-3"><label class="form-label" for="pfBio">Bio</label><textarea class="form-control" id="pfBio" rows="3" maxlength="500" required>${esc(chef.bio)}</textarea></div>
+        <div class="row g-2 mb-3"><div class="col-md-6"><label class="form-label" for="pfAdditionalCuisines">Other cuisines you cook</label><input class="form-control" id="pfAdditionalCuisines" maxlength="240" value="${esc((chef.additionalCuisines || []).join(', '))}" placeholder="Swahili, Ethiopian"></div><div class="col-md-6"><label class="form-label" for="pfSignatureDishes">Signature dishes</label><input class="form-control" id="pfSignatureDishes" maxlength="320" value="${esc((chef.signatureDishes || []).join(', '))}" placeholder="Coconut fish curry, pilau"></div></div>
+        <div class="mb-3"><label class="form-label" for="pfProfileImage">Profile photo link</label><input type="url" class="form-control" id="pfProfileImage" maxlength="500" value="${esc(chef.profileImage || '')}" placeholder="https://…"><div class="form-text">Use a direct HTTPS image link. This photo appears on your public chef profile.</div></div>
         <div class="row g-2 mb-3">
             <div class="col-md-4"><label class="form-label" for="pfRate">Hourly rate (${esc(c.currency)})</label>
                 <input type="number" class="form-control" id="pfRate" min="${esc(c.minHourlyRate)}" step="any" value="${esc(chef.hourlyRate)}" required>
@@ -1163,7 +1223,11 @@ formHandlers.profileForm = async () => {
     const rate = Number($('pfRate').value);
     if (rate < c.minHourlyRate) { notify(`The minimum hourly rate in ${c.name} is ${money(c.minHourlyRate, c)}.`, 'warning'); return; }
     const r = await guard(() => api.chefs.update(state.chef._id, {
-        bio: $('pfBio').value.trim(), hourlyRate: rate, serviceLocation: { city: $('pfCity').value.trim(), state: $('pfRegion').value.trim() }
+        bio: $('pfBio').value.trim(), hourlyRate: rate,
+        additionalCuisines: $('pfAdditionalCuisines').value.split(',').map((item) => item.trim()).filter(Boolean),
+        signatureDishes: $('pfSignatureDishes').value.split(',').map((item) => item.trim()).filter(Boolean),
+        profileImage: $('pfProfileImage').value.trim(),
+        serviceLocation: { city: $('pfCity').value.trim(), state: $('pfRegion').value.trim() }
     }));
     if (!r) return;
     notify('Profile saved.');
@@ -1424,7 +1488,7 @@ function renderKitchen() {
             return `<div class="meal-row">
                 <div class="d-flex gap-3">${mealPhotoHtml(m)}<div><strong>${esc(m.name)}</strong>${m.portion ? ` <span class="text-muted small">· ${esc(m.portion)}</span>` : ''}
                     ${m.description ? `<div class="small text-muted">${esc(m.description)}</div>` : ''}
-                    <div class="mt-1">${m.dietary.map((d) => `<span class="chip">${esc(metaLabel(state.meta.dietary, d))}</span>`).join('')}<span class="chip warn">~${esc(m.prepMinutes)} min</span></div></div></div>
+                    <div class="mt-1">${m.dietary.map((d) => `<span class="chip">${esc(metaLabel(state.meta.dietary, d))}</span>`).join('')}<span class="chip warn">~${esc(m.prepMinutes)} min</span></div><div class="d-flex gap-2 mt-2"><button class="btn btn-sm btn-outline-secondary" data-action="toggleInteraction" data-kind="like" data-type="meal" data-id="${esc(m.id)}"><i class="far fa-heart"></i> <span>Like</span> <b>0</b></button><button class="btn btn-sm btn-outline-secondary" data-action="toggleInteraction" data-kind="save" data-type="meal" data-id="${esc(m.id)}"><i class="far fa-bookmark"></i> <span>Save</span></button></div></div></div>
                 <div class="text-end"><div class="mb-2"><strong>${esc(money(m.price, c))}</strong></div>
                     <div class="qty"><button type="button" data-action="cartSub" data-id="${esc(m.id)}" ${qty ? '' : 'disabled'}>−</button><span>${qty}</span>
                     <button type="button" data-action="cartAdd" data-id="${esc(m.id)}" ${k.acceptingOrders ? '' : 'disabled'}>+</button></div></div>
@@ -1444,6 +1508,7 @@ function renderKitchen() {
             <div class="info-box"><i class="fas fa-circle-info me-1"></i>${how.map(esc).join(' · ')}. Payment is arranged directly with the chef.</div>
             ${k.acceptingOrders ? '' : '<div class="alert alert-secondary mt-2 mb-0">This kitchen is closed for orders right now. You can look at the menu.</div>'}</div>
         <div class="row g-4"><div class="col-lg-8">${sections}</div><div class="col-lg-4"><div class="cart-box" id="cartBox">${cartHtml()}</div></div></div>`;
+    hydrateInteractions('meal', k.meals.map((meal) => meal.id));
 }
 
 function cartHtml() {
@@ -1936,6 +2001,209 @@ async function removeMeal(id) {
     await guard(reloadMeals, { quiet: true });
 }
 
+/* ----------------- discovery feed, saved items and chef stories ----------------- */
+const splitTags = (value) => [...new Set(String(value || '').split(',').map((x) => x.trim()).filter(Boolean))];
+const chefName = (chef) => `${chef?.user?.firstName || 'Chef'} ${chef?.user?.lastName || ''}`.trim();
+const chefLocation = (chef) => [chef?.serviceLocation?.city, chef?.serviceLocation?.state, getCountry(chef?.serviceLocation?.country).name].filter(Boolean).join(', ');
+
+async function loadDiscoveryOptions() {
+    const select = $('discoveryChef');
+    if (!select || select.dataset.loaded === 'true') return;
+    try {
+        const r = await api.chefs.getAll({ country: getCountry().code });
+        select.innerHTML = '<option value="">All chefs</option>' + r.data.map((c) => `<option value="${esc(c._id)}">${esc(chefName(c))}</option>`).join('');
+        select.dataset.loaded = 'true';
+    } catch (e) { /* feed remains usable without the optional chef filter */ }
+}
+
+function discoveryParams() {
+    return { cuisine: $('discoveryCuisine').value, chef: $('discoveryChef').value, dish: $('discoveryDish').value.trim(), location: $('discoveryLocation').value.trim(), country: getCountry().code, dietary: $('discoveryDietary').value, occasion: $('discoveryOccasion').value };
+}
+
+function postMarkup(post) {
+    const chef = post.chef || {}, chefId = chef._id;
+    const mediaUrl = (m) => String(m?.secureUrl || '').replace(`/${m?.resourceType || (post.kind === 'video' ? 'video' : 'image')}/upload/`, `/${m?.resourceType || (post.kind === 'video' ? 'video' : 'image')}/upload/${post.kind === 'video' ? 'q_auto' : 'f_auto,q_auto'}/`);
+    const media = post.kind === 'video'
+        ? `<video class="story-media" muted playsinline loop controls preload="none" data-video-src="${esc(mediaUrl(post.media[0]))}" aria-label="${esc(post.dishName)} cooking video"></video>`
+        : `<div class="story-carousel">${post.media.map((m) => `<img src="${esc(mediaUrl(m))}" alt="${esc(post.dishName)} by ${esc(chefName(chef))}" loading="lazy">`).join('')}</div>`;
+    return `<article class="story-card" data-post-id="${esc(post._id)}"><div class="story-visual">${media}<div class="story-visual-shade"></div><div class="story-chef"><img src="${esc(chef.profileImage || '')}" alt="" loading="lazy" onerror="this.style.display='none'"><div><strong>${esc(chefName(chef))}</strong><small>${esc((post.cuisines || []).join(' · '))} · ${esc(chefLocation(chef))}</small></div><button class="story-icon" data-action="openChefProfile" data-id="${esc(chefId)}" aria-label="View chef profile"><i class="fas fa-arrow-up-right-from-square"></i></button></div><div class="story-copy"><span class="eyebrow">Cooked in your home</span><h3>${esc(post.dishName)}</h3><p>${esc(post.caption || 'A signature dish, prepared fresh at your table.')}</p><strong>${esc(money(chef.hourlyRate, getCountry(chef.serviceLocation?.country)))} <small>/ hour</small></strong></div></div><div class="story-actions"><button class="btn btn-light btn-sm ${post.likedByMe ? 'is-active' : ''}" data-action="toggleInteraction" data-kind="like" data-type="post" data-id="${esc(post._id)}"><i class="${post.likedByMe ? 'fas' : 'far'} fa-heart"></i> <span>${post.likedByMe ? 'Liked' : 'Like'}</span> <b>${esc(post.likeCount || 0)}</b></button><button class="btn btn-light btn-sm ${post.savedByMe ? 'is-active' : ''}" data-action="toggleInteraction" data-kind="save" data-type="post" data-id="${esc(post._id)}"><i class="${post.savedByMe ? 'fas' : 'far'} fa-bookmark"></i> <span>${post.savedByMe ? 'Saved' : 'Save'}</span></button><button class="btn btn-outline-primary btn-sm" data-action="sharePost" data-id="${esc(post._id)}"><i class="fas fa-share-nodes"></i> Share</button><button class="btn btn-primary btn-sm ms-auto" data-action="bookChef" data-id="${esc(chefId)}">Book this chef</button></div><div class="story-tags">${[...(post.dietaryTags || []), ...(post.occasions || [])].map((x) => `<span class="chip">${esc(x.replaceAll('_', ' '))}</span>`).join('')}</div></article>`;
+}
+
+function observeStoryVideos(root) {
+    if (state.discoveryObserver) state.discoveryObserver.disconnect();
+    const videos = [...root.querySelectorAll('video[data-video-src]')];
+    const load = (video, visible) => {
+        if (!video.src && video.dataset.videoSrc) video.src = video.dataset.videoSrc;
+        if (visible) video.play().catch(() => {}); else video.pause();
+    };
+    if (!('IntersectionObserver' in window)) { videos.forEach((video) => load(video, false)); return; }
+    state.discoveryObserver = new IntersectionObserver((entries) => entries.forEach((entry) => load(entry.target, entry.isIntersecting)), { threshold: 0.55 });
+    videos.forEach((video) => state.discoveryObserver.observe(video));
+}
+
+async function loadDiscoveryFeed(params = discoveryParams(), targetId = '') {
+    const root = $('discoveryFeed');
+    if (!root) return;
+    root.innerHTML = '<div class="chef-loading">Finding chefs and their latest dishes…</div>';
+    const r = await guard(() => api.discovery.posts(targetId ? { post: targetId } : params));
+    if (!r) { root.innerHTML = '<div class="alert alert-light border">Stories could not be loaded. Please try again.</div>'; return; }
+    if (!r.data.length) { root.innerHTML = '<div class="discovery-empty"><i class="fas fa-utensils"></i><h3>No cooking stories yet</h3><p>Try a different cuisine or location. New chef stories will appear here.</p></div>'; return; }
+    root.innerHTML = r.data.map(postMarkup).join('');
+    observeStoryVideos(root);
+    if (targetId) root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function hydrateInteractions(targetType, ids) {
+    if (!ids.length) return;
+    try {
+        const r = await api.interactions.summary(targetType, ids);
+        for (const summary of r.data) {
+            document.querySelectorAll(`[data-type="${targetType}"][data-id="${summary.id}"]`).forEach((button) => paintInteraction(button, summary));
+        }
+    } catch (e) { /* buttons remain in the unauthenticated default state */ }
+}
+
+function paintInteraction(button, item) {
+    const active = item.active ?? item[button.dataset.kind === 'like' ? 'liked' : 'saved'];
+    button.classList.toggle('is-active', !!active);
+    const icon = button.querySelector('i');
+    const kind = item.kind || button.dataset.kind;
+    if (icon) icon.className = kind === 'like' ? `${active ? 'fas' : 'far'} fa-heart` : `${active ? 'fas' : 'far'} fa-bookmark`;
+    const label = button.querySelector('span');
+    if (label) label.textContent = kind === 'like' ? (active ? 'Liked' : 'Like') : (active ? 'Saved' : 'Save');
+    const count = button.querySelector('b'); if (count && item.likeCount !== undefined) count.textContent = item.likeCount;
+}
+
+async function toggleInteraction(data) {
+    if (!state.user) { state.returnTo = document.querySelector('.page[style*="display: block"]')?.id || 'discoveryPage'; notify('Log in to save favourites and like dishes.'); showPage('customerAuthPage'); return; }
+    if (state.user.role !== 'customer') { notify('Favourites are available on customer accounts.', 'info'); return; }
+    const button = document.querySelector(`[data-action="toggleInteraction"][data-id="${data.id}"][data-kind="${data.kind}"]`);
+    if (!button) return;
+    button.disabled = true;
+    const r = await guard(() => api.interactions.toggle({ kind: data.kind, targetType: data.type, target: data.id }), { quiet: true });
+    button.disabled = false;
+    if (!r) return;
+    paintInteraction(button, { kind: data.kind, active: r.active, likeCount: r.likeCount });
+    notify(r.active ? (data.kind === 'like' ? 'Added to your likes.' : 'Saved for later.') : (data.kind === 'like' ? 'Like removed.' : 'Removed from saved items.'), 'success');
+    if (data.kind === 'save' && $('myBookingsPage').style.display === 'block') loadSavedItems();
+}
+
+async function loadSavedItems() {
+    if (!requireRole('customer')) return;
+    $('savedChefsList').innerHTML = '<div class="text-muted py-3">Loading your saved chefs…</div>';
+    $('savedDishesList').innerHTML = '<div class="text-muted py-3">Loading your saved dishes…</div>';
+    const r = await guard(() => api.interactions.saved(), { quiet: true });
+    if (!r) return;
+    const chefs = (r.data.chefs || []).map((x) => x.item), dishes = r.data.dishes || [];
+    $('savedChefsList').innerHTML = chefs.length ? `<div class="saved-grid">${chefs.map((chef) => `<article class="saved-card"><img src="${esc(chef.profileImage || '')}" alt="" loading="lazy"><div><h3>${esc(chefName(chef))}</h3><p>${esc([chef.cuisineSpecialization, ...(chef.additionalCuisines || [])].join(' · '))} · ${esc(chefLocation(chef))}</p><button class="btn btn-sm btn-primary" data-action="bookChef" data-id="${esc(chef._id)}">Book chef</button> <button class="btn btn-sm btn-outline-secondary" data-action="toggleInteraction" data-kind="save" data-type="chef" data-id="${esc(chef._id)}">Remove</button></div></article>`).join('')}</div>` : '<div class="discovery-empty"><h3>No saved chefs yet</h3><p>Save a chef profile and it will be ready here when you plan your next meal.</p><button class="btn btn-outline-primary" data-action="goPage" data-page="discoveryPage">Explore chefs</button></div>';
+    $('savedDishesList').innerHTML = dishes.length ? `<div class="saved-grid">${dishes.map((saved) => {
+        const item = saved.item, isPost = saved.type === 'post'; const chef = item.chef; const title = isPost ? item.dishName : item.name; const photo = isPost ? item.media?.[0]?.secureUrl : item.photoVersion ? imgSrc(`/api/photos/meals/${item._id}?v=${item.photoVersion}&size=thumb`) : '';
+        return `<article class="saved-card"><img src="${esc(photo || '')}" alt="${esc(title)}" loading="lazy"><div><h3>${esc(title)}</h3><p>${esc(chefName(chef))} · ${esc(chefLocation(chef))}</p><button class="btn btn-sm btn-primary" data-action="openChefProfile" data-id="${esc(chef?._id)}">View chef</button> <button class="btn btn-sm btn-outline-secondary" data-action="toggleInteraction" data-kind="save" data-type="${esc(saved.type)}" data-id="${esc(item._id)}">Remove</button></div></article>`;
+    }).join('')}</div>` : '<div class="discovery-empty"><h3>No saved dishes yet</h3><p>Save a dish from a cooking story or chef menu to collect ideas for your next booking.</p><button class="btn btn-outline-primary" data-action="goPage" data-page="discoveryPage">Explore dishes</button></div>';
+}
+
+async function openChefProfile(id) {
+    if (!id) return;
+    state.profileChefId = id; showPage('chefProfilePage');
+    $('chefProfileContent').innerHTML = '<div class="chef-loading">Opening chef profile…</div>';
+    const r = await guard(() => api.chefs.getById(id));
+    if (!r) return;
+    const chef = r.data; state.currentProfileChef = chef;
+    if (!state.chefs.some((c) => c._id === id)) state.chefs.push(chef);
+    const stories = await api.discovery.posts({ chef: id, limit: 24 }).catch(() => ({ data: [] }));
+    const dishes = chef.signatureDishes || [];
+    $('chefProfileContent').innerHTML = `<section class="chef-profile-hero"><img src="${esc(chef.profileImage || '')}" alt="${esc(chefName(chef))}" loading="lazy"><div><span class="eyebrow">Your chef, at your table</span><h1>${esc(chefName(chef))}</h1><p>${esc(chefLocation(chef))} · ${esc(chef.experience)} years experience</p><p>${esc([chef.cuisineSpecialization, ...(chef.additionalCuisines || [])].join(' · '))}</p><p>${esc(chef.bio || '')}</p><div>${stars(chef.rating?.average)} ${esc(chef.rating?.count || 0)} reviews</div><h3 class="mt-3">${esc(money(chef.hourlyRate, getCountry(chef.serviceLocation?.country)))} <small>/ hour</small></h3><button class="btn btn-primary" data-action="bookChef" data-id="${esc(id)}">Check availability & book</button> <button class="btn btn-outline-primary" data-action="toggleInteraction" data-kind="like" data-type="chef" data-id="${esc(id)}"><i class="far fa-heart"></i> <span>Like</span><b class="ms-1">0</b></button> <button class="btn btn-outline-primary" data-action="toggleInteraction" data-kind="save" data-type="chef" data-id="${esc(id)}"><i class="far fa-bookmark"></i> <span>Save chef</span></button></div></section><div class="my-4"><h2>Signature dishes</h2><div class="story-tags">${dishes.length ? dishes.map((dish) => `<span class="chip">${esc(dish)}</span>`).join('') : '<span class="text-muted">Ask for a menu tailored to your occasion.</span>'}</div><h3 class="h5 mt-3">Photo collections & cooking videos</h3><p class="text-muted">Browse this chef’s cooking stories below.</p></div><h2>Cooking stories</h2><div class="discovery-feed">${stories.data.length ? stories.data.map(postMarkup).join('') : '<div class="text-muted py-3">This chef has not shared a cooking story yet.</div>'}</div>`;
+    observeStoryVideos($('chefProfileContent'));
+    hydrateInteractions('chef', [id]);
+}
+
+async function loadChefStories() {
+    if (state.user?.role !== 'chef') return;
+    const box = $('chefStoriesPanel'); if (!box) return;
+    try {
+        const r = await api.discovery.myPosts();
+        state.chefPosts = r.data;
+        box.innerHTML = `<div class="d-flex justify-content-between align-items-center mb-3"><div><h4>Stories from your kitchen</h4><p class="text-muted mb-0">Short cooking videos and photo collections help customers find you.</p></div><button class="btn btn-primary" data-action="newStory"><i class="fas fa-plus me-1"></i>New story</button></div>${r.data.length ? `<div class="chef-story-list">${r.data.map((p) => `<div class="chef-story-row"><strong>${esc(p.dishName)}</strong><span>${esc(p.kind)} · ${(p.media || []).length} item(s)</span><button class="btn btn-sm btn-outline-primary" data-action="editStory" data-id="${esc(p._id)}">Edit</button><button class="btn btn-sm btn-outline-danger" data-action="deleteStory" data-id="${esc(p._id)}">Delete</button></div>`).join('')}</div>` : '<div class="discovery-empty"><p>You have not shared a cooking story yet. Post a short video or a collection of dish photos.</p></div>'}`;
+    } catch (e) { box.innerHTML = '<div class="alert alert-light border">Your stories could not be loaded. Please try again later.</div>'; }
+}
+
+function editStory(id) {
+    const post = (state.chefPosts || []).find((p) => p._id === id);
+    if (!post) { notify('Reload your stories and try again.', 'warning'); return; }
+    openStoryEditor(post);
+}
+
+async function deleteStory(id) {
+    if (!confirm('Delete this cooking story and its uploaded media?')) return;
+    const r = await guard(() => api.discovery.deletePost(id));
+    if (r) { notify('Cooking story deleted.'); loadChefStories(); }
+}
+
+async function sharePost(id) {
+    const url = new URL(location.href); url.hash = `post=${id}`;
+    try { await navigator.clipboard.writeText(url.toString()); notify('Story link copied.'); }
+    catch (e) { prompt('Copy this story link:', url.toString()); }
+}
+
+function openStoryEditor(post) {
+    $('storyForm').reset(); $('storyPostId').value = post?._id || '';
+    $('storyModalTitle').textContent = post ? 'Edit cooking story' : 'Share a cooking story';
+    $('storySubmitBtn').textContent = post ? 'Save changes' : 'Publish story';
+    $('storyDishName').value = post?.dishName || ''; $('storyCaption').value = post?.caption || '';
+    $('storyCuisines').value = (post?.cuisines || [state.chef?.cuisineSpecialization]).filter(Boolean).join(', ');
+    $('storyOccasions').value = (post?.occasions || []).join(', '); $('storyDietary').value = (post?.dietaryTags || []).join(', ');
+    $('storyKind').value = post?.kind || 'video'; $('storyKind').disabled = !!post; $('storyMediaFiles').required = !post; $('storyMediaFiles').disabled = !!post;
+    setStoryMediaInput(); $('storyUploadStatus').textContent = post ? 'To replace media, delete this story and create a new one.' : '';
+    modal('storyEditorModal').show();
+}
+
+function setStoryMediaInput() {
+    const video = $('storyKind').value === 'video'; $('storyMediaFiles').accept = video ? 'video/mp4,video/webm,video/quicktime' : 'image/jpeg,image/png,image/webp';
+    $('storyMediaFiles').multiple = !video;
+    $('storyMediaHint').textContent = video ? 'MP4, WebM or MOV, up to 50 MB and 30 seconds.' : 'JPG, PNG or WebP, up to 10 MB each; choose up to 6 photos.';
+}
+
+async function fileDuration(file) {
+    return new Promise((resolve, reject) => { const video = document.createElement('video'), url = URL.createObjectURL(file); video.preload = 'metadata'; video.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(video.duration); }; video.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read video duration.')); }; video.src = url; });
+}
+
+async function uploadStoryFiles(files) {
+    const video = $('storyKind').value === 'video';
+    if (!files.length || files.length > (video ? 1 : 6)) throw new Error(video ? 'Choose one video.' : 'Choose up to six photos.');
+    for (const file of files) {
+        if (file.size > (video ? 50 : 10) * 1024 * 1024) throw new Error(video ? 'Videos must be 50 MB or smaller.' : 'Each photo must be 10 MB or smaller.');
+        if (video && (!file.type.startsWith('video/') || await fileDuration(file) > 30)) throw new Error('Choose a supported video up to 30 seconds long.');
+        if (!video && !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Photos must be JPG, PNG, or WebP.');
+    }
+    const sig = (await api.discovery.uploadSignature()).data;
+    const uploaded = [];
+    for (let i = 0; i < files.length; i++) {
+        $('storyUploadStatus').textContent = `Uploading ${i + 1} of ${files.length}…`;
+        const form = new FormData(); form.append('file', files[i]); form.append('api_key', sig.apiKey); form.append('timestamp', sig.timestamp); form.append('signature', sig.signature); form.append('public_id', sig.publicId);
+        if (sig.uploadPreset) form.append('upload_preset', sig.uploadPreset);
+        const type = video ? 'video' : 'image';
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${encodeURIComponent(sig.cloudName)}/${type}/upload`, { method: 'POST', body: form });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error?.message || 'Media upload failed.');
+        uploaded.push({ publicId: result.public_id, resourceType: result.resource_type });
+    }
+    return uploaded;
+}
+
+formHandlers.discoveryFilters = async (form) => { await loadDiscoveryFeed(discoveryParams()); };
+formHandlers.storyForm = async () => {
+    if (!state.user || state.user.role !== 'chef' || !(await ensureVerified())) return;
+    const id = $('storyPostId').value;
+    const data = { dishName: $('storyDishName').value.trim(), caption: $('storyCaption').value.trim(), cuisines: splitTags($('storyCuisines').value), occasions: splitTags($('storyOccasions').value), dietaryTags: splitTags($('storyDietary').value) };
+    $('storySubmitBtn').disabled = true;
+    try {
+        if (id) await api.discovery.updatePost(id, data);
+        else { data.kind = $('storyKind').value; data.media = await uploadStoryFiles([...$('storyMediaFiles').files]); await api.discovery.createPost(data); }
+        hideModal('storyEditorModal'); notify(id ? 'Cooking story updated.' : 'Cooking story published.'); await loadChefStories();
+    } catch (e) { notify(e.message || 'Could not publish this story.', 'danger'); }
+    finally { $('storySubmitBtn').disabled = false; $('storyUploadStatus').textContent = ''; }
+};
+
 /* ------------------------- clicks, forms and changes ------------------------- */
 const actions = {
     logout, goPage: (d) => showPage(d.page), bookChef: (d) => startBooking(d.id),
@@ -1956,7 +2224,9 @@ const actions = {
     addMeal: () => openMeal(), editMeal: (d) => openMeal(d.id), toggleMeal: (d) => toggleMeal(d.id), deleteMeal: (d) => removeMeal(d.id), toggleKitchenOpen,
     adminDoc: (d) => openAdminDoc(d.id, d.type), adminSchedule: (d) => openSchedule(d.id),
     adminInterviewDone: (d) => openInterviewDone(d.id), adminApprove: (d) => approveChef(d.id),
-    adminReject: (d) => { $('arChefId').value = d.id; $('arReason').value = ''; modal('adminRejectModal').show(); }
+    adminReject: (d) => { $('arChefId').value = d.id; $('arReason').value = ''; modal('adminRejectModal').show(); },
+    toggleInteraction: (d) => toggleInteraction(d), openChefProfile: (d) => openChefProfile(d.id), sharePost: (d) => sharePost(d.id),
+    newStory: () => openStoryEditor(), editStory: (d) => editStory(d.id), deleteStory: (d) => deleteStory(d.id)
 };
 
 document.addEventListener('click', (e) => {
@@ -1983,6 +2253,7 @@ document.addEventListener('change', (e) => {
     else if (t.name === 'coFulfilment') updateCheckoutView();
     else if (t.id === 'toAllDay') $('toTimes').style.display = t.checked ? 'none' : 'flex';
     else if (t.name === 'ivPassed') $('ivReasonBox').style.display = $('ivPassedNo').checked ? 'block' : 'none';
+    else if (t.id === 'storyKind') setStoryMediaInput();
 });
 
 /* --------------------------------- 9. start-up -------------------------------- */
@@ -2016,10 +2287,13 @@ async function init() {
     api.bookings.reasonCodes().then((r) => { state.reasonCodes = r.data; }).catch(() => {});
     state.resetToken = takeHashToken('reset');
     const verifyToken = state.resetToken ? null : takeHashToken('verify');
+    const sharedPost = !state.resetToken && !verifyToken && /^#post=[a-f\d]{24}$/i.test(location.hash) ? location.hash.slice(6) : null;
+    if (sharedPost) history.replaceState(null, '', `${location.pathname}${location.search}`);
     await restoreSession();
     renderNav();
     if (state.resetToken) { $('resetExpired').style.display = 'none'; showPage('resetPasswordPage'); }
     else if (verifyToken) await confirmEmail(verifyToken);
+    else if (sharedPost) { state.openPostId = sharedPost; showPage('discoveryPage'); }
     else showPage('homePage');
 }
 

@@ -11,6 +11,7 @@
     "create-admin": "node scripts/createAdmin.js",
     "migrate": "node scripts/migrateData.js",
     "test:flow": "node scripts/smokeTest.js",
+    "db:indexes:discovery": "node scripts/createDiscoveryIndexes.js",
     "verify-existing": "node scripts/verifyExistingUsers.js"
   },
   "keywords": [],

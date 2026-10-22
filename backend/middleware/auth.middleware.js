@@ -23,6 +23,20 @@ exports.protect = async (req, res, next) => {
     }
 };
 
+// Public discovery routes can add personalized like/save state when a valid
+// customer token is present, without making sign-in mandatory for browsing.
+exports.optionalProtect = async (req, res, next) => {
+    const header = req.headers.authorization;
+    const token = header && header.startsWith('Bearer ') ? header.split(' ')[1] : null;
+    if (!token) return next();
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id).select('+passwordChangedAt');
+        if (user && user.isActive && (!user.passwordChangedAt || decoded.iat >= Math.floor(user.passwordChangedAt.getTime() / 1000))) req.user = user;
+    } catch (err) { /* public request stays public if an optional token is stale */ }
+    next();
+};
+
 exports.authorize = (...roles) => (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
         return res.status(403).json({

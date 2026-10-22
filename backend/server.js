@@ -38,7 +38,8 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com", "https://accounts.google.com/gsi/style"],
             fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:", "http:"],
-            connectSrc: ["'self'", "http://localhost:5000", "https://chefmtaani.onrender.com", "https://cdnjs.cloudflare.com", "https://accounts.google.com/gsi/"],
+            mediaSrc: ["'self'", "https://res.cloudinary.com"],
+            connectSrc: ["'self'", "http://localhost:5000", "https://chefmtaani.onrender.com", "https://cdnjs.cloudflare.com", "https://accounts.google.com/gsi/", "https://api.cloudinary.com"],
             frameSrc: ["'self'", "https://accounts.google.com/gsi/"],
         },
     },
@@ -83,6 +84,8 @@ app.use('/api/kitchens', require('./routes/kitchen.routes'));   // food ordering
 app.use('/api/meals', require('./routes/meal.routes'));         // the chef's meals
 app.use('/api/orders', require('./routes/order.routes'));       // food orders
 app.use('/api/photos', require('./routes/photo.routes'));       // public meal photos (stored in the database)
+app.use('/api/discovery', require('./routes/discovery.routes')); // chef cooking posts and signed Cloudinary uploads
+app.use('/api/interactions', require('./routes/interaction.routes')); // customer likes and saved collections
 app.use('/api/contact', require('./routes/contact.routes'));
 app.use('/api/admin', require('./routes/admin.routes'));
 

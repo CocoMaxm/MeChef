@@ -34,7 +34,14 @@ exports.getChefs = async (req, res, next) => {
             if (!c) return res.status(400).json({ success: false, error: 'Unsupported country' });
             query['serviceLocation.country'] = c.code;
         }
-        if (cuisine) query.cuisineSpecialization = String(cuisine);
+        if (cuisine) {
+            const cuisineName = String(cuisine).trim().slice(0, 60);
+            const escapedCuisine = new RegExp(`^${escapeRegex(cuisineName)}$`, 'i');
+            query.$or = [
+                { cuisineSpecialization: escapedCuisine },
+                { additionalCuisines: escapedCuisine }
+            ];
+        }
         if (city) query['serviceLocation.city'] = new RegExp(escapeRegex(city), 'i');
         if (state) query['serviceLocation.state'] = new RegExp(escapeRegex(state), 'i');
         if (minPrice || maxPrice) {
@@ -96,9 +103,27 @@ exports.updateChef = async (req, res, next) => {
 
         const b = req.body;
         const $set = {};
-        ['bio', 'experience', 'cuisineSpecialization', 'additionalCuisines', 'hourlyRate'].forEach((f) => {
+        ['bio', 'experience', 'cuisineSpecialization', 'hourlyRate'].forEach((f) => {
             if (b[f] !== undefined) $set[f] = b[f];
         });
+        ['additionalCuisines', 'signatureDishes'].forEach((f) => {
+            if (Array.isArray(b[f])) {
+                const maxLength = f === 'signatureDishes' ? 80 : 60;
+                const maxItems = f === 'signatureDishes' ? 8 : 10;
+                $set[f] = [...new Set(b[f].map((item) => String(item).trim().slice(0, maxLength)).filter(Boolean))].slice(0, maxItems);
+            }
+        });
+        if (b.profileImage !== undefined) {
+            const image = String(b.profileImage || '').trim();
+            if (image) {
+                let parsed;
+                try { parsed = new URL(image); } catch (e) { return res.status(400).json({ success: false, error: 'Profile photo must be a valid HTTPS image link' }); }
+                if (parsed.protocol !== 'https:' || parsed.username || parsed.password || image.length > 500) {
+                    return res.status(400).json({ success: false, error: 'Profile photo must be a valid HTTPS image link' });
+                }
+            }
+            $set.profileImage = image || null;
+        }
 
         if (b.serviceLocation && typeof b.serviceLocation === 'object') {
             ['city', 'state', 'country', 'maxTravelDistance'].forEach((f) => {

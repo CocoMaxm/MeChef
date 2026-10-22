@@ -89,6 +89,20 @@ const api = {
 
   cuisines: { getAll: (params) => request('GET', `/cuisines${qs(params)}`) },
 
+  discovery: {
+    posts: (params = {}) => request('GET', `/discovery/posts${qs(params)}`),
+    myPosts: () => request('GET', '/discovery/mine', { auth: true }),
+    uploadSignature: () => request('POST', '/discovery/uploads/signature', { auth: true, json: {} }),
+    createPost: (data) => request('POST', '/discovery/posts', { auth: true, json: data }),
+    updatePost: (id, data) => request('PUT', `/discovery/posts/${id}`, { auth: true, json: data }),
+    deletePost: (id) => request('DELETE', `/discovery/posts/${id}`, { auth: true }),
+  },
+  interactions: {
+    summary: (targetType, targetIds) => request('GET', `/interactions/summary${qs({ targetType, targetIds: targetIds.join(',') })}`),
+    saved: () => request('GET', '/interactions/saved', { auth: true }),
+    toggle: (data) => request('POST', '/interactions/toggle', { auth: true, json: { ...data, targetId: data.targetId || data.target } }),
+  },
+
   // Food ordering: chefs as independent kitchens
   kitchens: {
     meta: () => request('GET', '/kitchens/meta'),

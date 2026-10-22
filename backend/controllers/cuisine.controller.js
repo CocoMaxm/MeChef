@@ -15,7 +15,16 @@ exports.getCuisines = async (req, res, next) => {
 
         const cuisines = await Chef.aggregate([
             { $match: match },
-            { $group: { _id: '$cuisineSpecialization', count: { $sum: 1 }, priceTotal: { $sum: '$hourlyRate' }, ratingTotal: { $sum: '$rating.average' } } },
+            { $project: {
+                cuisines: { $setUnion: [
+                    [{ $toLower: '$cuisineSpecialization' }],
+                    { $map: { input: { $ifNull: ['$additionalCuisines', []] }, as: 'cuisine', in: { $toLower: '$$cuisine' } } }
+                ] },
+                hourlyRate: 1,
+                rating: 1
+            } },
+            { $unwind: '$cuisines' },
+            { $group: { _id: '$cuisines', count: { $sum: 1 }, priceTotal: { $sum: '$hourlyRate' }, ratingTotal: { $sum: '$rating.average' } } },
             { $sort: { count: -1 } }
         ]);
 

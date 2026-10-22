@@ -57,7 +57,7 @@ exports.login = async (req, res, next) => {
 exports.registerChef = async (req, res, next) => {
     let user;
     try {
-        const { firstName, lastName, email, password, bio, experience, cuisineSpecialization, hourlyRate, serviceLocation } = req.body;
+        const { firstName, lastName, email, password, bio, experience, cuisineSpecialization, additionalCuisines, signatureDishes, hourlyRate, serviceLocation } = req.body;
 
         user = await User.create({ firstName, lastName, email, password, role: 'chef' });
 
@@ -65,7 +65,14 @@ exports.registerChef = async (req, res, next) => {
         try {
             chef = await Chef.create({
                 user: user._id,
-                bio, experience, cuisineSpecialization, hourlyRate,
+                bio, experience, cuisineSpecialization,
+                additionalCuisines: Array.isArray(additionalCuisines)
+                    ? [...new Set(additionalCuisines.map((name) => String(name).trim().slice(0, 60)).filter(Boolean))].slice(0, 10)
+                    : [],
+                signatureDishes: Array.isArray(signatureDishes)
+                    ? [...new Set(signatureDishes.map((name) => String(name).trim().slice(0, 80)).filter(Boolean))].slice(0, 8)
+                    : [],
+                hourlyRate,
                 serviceLocation: {
                     country: String(serviceLocation?.country || DEFAULT_COUNTRY).toUpperCase(),
                     city: serviceLocation?.city || '',

@@ -18,6 +18,8 @@ const ChefApplication = require('../models/ChefApplication.model');
 const TimeOff = require('../models/TimeOff.model');
 const Meal = require('../models/Meal.model');
 const MealPhoto = require('../models/MealPhoto.model');
+const ChefPost = require('../models/ChefPost.model');
+const UserInteraction = require('../models/UserInteraction.model');
 const sharp = require('sharp');
 const Order = require('../models/Order.model');
 
@@ -190,6 +192,37 @@ const inDays = (n) => new Date(Date.now() + n * 86400000).toISOString();
         check('approved chef is now listed, with currency KES', !!listed && listed.currency === 'KES', msg(r));
         r = await call('GET', '/cuisines?country=KE');
         check('cuisine stats work per country', r.status === 200 && r.data.data.some((c) => c.currency === 'KES'), msg(r));
+
+        section('4a. Chef discovery stories, likes and private saves');
+        const story = await ChefPost.create({
+            chef: chefKe, kind: 'carousel', dishName: 'Smoke-test biryani', caption: 'A layered celebration dish', cuisines: ['Kenyan'],
+            media: [{ publicId: `test/${RUN}/biryani`, resourceType: 'image', secureUrl: 'https://res.cloudinary.com/demo/image/upload/sample.jpg', format: 'jpg', bytes: 128, version: 1 }]
+        });
+        r = await call('GET', `/discovery/posts?cuisine=Kenyan&country=KE&chef=${chefKe}`);
+        check('public discovery feed filters stories by cuisine, country and chef', r.status === 200 && r.data.data.some((p) => p._id === String(story._id)), msg(r));
+        r = await call('POST', '/interactions/toggle', { json: { kind: 'like', targetType: 'post', targetId: String(story._id) } });
+        check('anonymous visitors cannot like a story', r.status === 401, msg(r));
+        r = await call('POST', '/interactions/toggle', { token: chefKeToken, json: { kind: 'like', targetType: 'post', targetId: String(story._id) } });
+        check('chef accounts cannot use customer likes', r.status === 403, msg(r));
+        r = await call('POST', '/interactions/toggle', { token: cus1, json: { kind: 'like', targetType: 'post', targetId: String(story._id) } });
+        check('customer can persist a story like and receives its count', r.status === 200 && r.data.active && r.data.likeCount === 1, msg(r));
+        await UserInteraction.init();
+        let duplicateBlocked = false;
+        try { await UserInteraction.create({ user: (await User.findOne({ email: email('cus1') }))._id, kind: 'like', targetType: 'post', target: story._id }); }
+        catch (err) { duplicateBlocked = err.code === 11000; }
+        check('MongoDB unique index prevents duplicate likes', duplicateBlocked && await UserInteraction.countDocuments({ targetType: 'post', target: story._id, kind: 'like' }) === 1);
+        r = await call('POST', '/interactions/toggle', { token: cus1, json: { kind: 'save', targetType: 'post', targetId: String(story._id) } });
+        check('customer can persist a saved dish', r.status === 200 && r.data.active, msg(r));
+        r = await call('GET', '/interactions/saved', { token: cus1 });
+        check('customer saved collection contains their dish', r.status === 200 && r.data.data.dishes.some((x) => x.item._id === String(story._id)), msg(r));
+        r = await call('GET', '/interactions/saved', { token: cus2 });
+        check('a different customer cannot see another customer\'s saves', r.status === 200 && r.data.data.dishes.length === 0 && r.data.data.chefs.length === 0, msg(r));
+        r = await call('POST', '/interactions/toggle', { token: cus1, json: { kind: 'save', targetType: 'chef', targetId: chefKe } });
+        check('customer can save a chef profile', r.status === 200 && r.data.active, msg(r));
+        r = await call('POST', '/discovery/uploads/signature', { token: cus1, json: {} });
+        check('customers cannot request chef upload signatures', r.status === 403, msg(r));
+        r = await call('POST', '/discovery/uploads/signature', { token: chefKeToken, json: {} });
+        check('chef uploads return a clear error when Cloudinary is not configured', r.status === 503 && /Cloudinary/i.test(msg(r)), msg(r));
 
         // failed interview path
         r = await call('POST', '/auth/register-chef', { json: chefPayload('chefno') });
@@ -706,6 +739,8 @@ const inDays = (n) => new Date(Date.now() + n * 86400000).toISOString();
             const userIds = users.map((u) => u._id);
             const chefs = await Chef.find({ user: { $in: userIds } }).select('_id');
             const chefIds = chefs.map((c) => c._id);
+            await UserInteraction.deleteMany({ $or: [{ user: { $in: userIds } }, { target: { $in: chefIds } }] });
+            await ChefPost.deleteMany({ chef: { $in: chefIds } });
             await Booking.deleteMany({ $or: [{ chef: { $in: chefIds } }, { customer: { $in: userIds } }] });
             await TimeOff.deleteMany({ chef: { $in: chefIds } });
             await Order.deleteMany({ $or: [{ chef: { $in: chefIds } }, { customer: { $in: userIds } }] });

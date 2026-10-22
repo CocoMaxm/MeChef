@@ -13,6 +13,7 @@ const chefSchema = new mongoose.Schema({
         enum: ['Italian', 'French', 'Asian', 'Mexican', 'Indian', 'Mediterranean', 'American', 'Kenyan','Other'] 
     },
     additionalCuisines: [{ type: String }],
+    signatureDishes: [{ type: String, trim: true, maxlength: 80 }],
     hourlyRate: { type: Number, required: [true, 'Hourly rate is required'], min: [1, 'Hourly rate must be greater than 0'] },
     serviceLocation: {
         country: { type: String, enum: Object.keys(COUNTRIES), default: DEFAULT_COUNTRY },
@@ -69,6 +70,7 @@ const chefSchema = new mongoose.Schema({
 // Create index for location-based queries
 chefSchema.index({ 'serviceLocation.city': 1, 'serviceLocation.state': 1 });
 chefSchema.index({ cuisineSpecialization: 1 });
+chefSchema.index({ 'serviceLocation.country': 1, additionalCuisines: 1 });
 chefSchema.index({ 'serviceLocation.country': 1 });
 chefSchema.index({ 'kitchen.enabled': 1, 'serviceLocation.country': 1 });
 chefSchema.index({ 'rating.average': -1 });
