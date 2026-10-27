@@ -1,4 +1,4 @@
-// ChefMtaani API client. Every backend endpoint the website uses lives here.
+// MyMealChef API client. Every backend endpoint the website uses lives here.
 // When the page is served by the backend (or deployed), the API is on the same origin.
 // Only when opened via VS Code Live Server (port 5500) or as a file does it call localhost:5000.
 const API_BASE_URL =

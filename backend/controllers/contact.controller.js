@@ -26,7 +26,7 @@ exports.submitContact = async (req, res, next) => {
                 email,
                 subject: 'We received your message',
                 html: `
-                    <h2>Thank you for contacting ChefMtaani!</h2>
+                    <h2>Thank you for contacting MyMealChef!</h2>
                     <p>We've received your message and will get back to you within 24-48 hours.</p>`
             })
         ]);

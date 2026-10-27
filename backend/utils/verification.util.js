@@ -26,9 +26,9 @@ const sendVerificationEmail = async (user, { role } = {}) => {
 
     return sendEmail.safe({
         email: user.email,
-        subject: 'Confirm your ChefMtaani email address',
+        subject: 'Confirm your MyMealChef email address',
         html: `<h2>Confirm your email address</h2>
-            <p>Hi ${escapeHtml(user.firstName)}, welcome to ChefMtaani! Please confirm that this is your email address.</p>
+            <p>Hi ${escapeHtml(user.firstName)}, welcome to MyMealChef! Please confirm that this is your email address.</p>
             <p><a href="${link}" style="display:inline-block;padding:10px 18px;background:#ff6b6b;color:#fff;text-decoration:none;border-radius:6px">Confirm my email</a></p>
             <p>Or copy this link into your browser:<br>${link}</p>
             ${next}

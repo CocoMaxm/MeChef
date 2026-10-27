@@ -224,10 +224,10 @@ exports.updateOrderStatus = async (req, res, next) => {
             html = `<h2>Your order is ready</h2>${order.fulfilment === 'pickup' ? pickupBlock : '<p>A rider will collect it for delivery.</p>'}`;
         } else if (status === 'completed') {
             subject = `Order ${order.code} completed`;
-            html = '<h2>Enjoy your meal!</h2><p>Thank you for ordering with ChefMtaani.</p>';
+            html = '<h2>Enjoy your meal!</h2><p>Thank you for ordering with MyMealChef.</p>';
         } else if (status === 'rejected' || status === 'cancelled') {
             subject = `Order ${order.code} ${status === 'rejected' ? 'declined' : 'cancelled'}`;
-            html = `<h2>Your order was ${status === 'rejected' ? 'declined' : 'cancelled'} by ${escapeHtml(kitchen.name)}</h2><p>Reason: ${escapeHtml(reasonInfo.label)}</p>${note}<p>You can order from another kitchen on ChefMtaani.</p>`;
+            html = `<h2>Your order was ${status === 'rejected' ? 'declined' : 'cancelled'} by ${escapeHtml(kitchen.name)}</h2><p>Reason: ${escapeHtml(reasonInfo.label)}</p>${note}<p>You can order from another kitchen on MyMealChef.</p>`;
         }
         if (subject) await sendEmail.safe({ email: to, subject, html });
 

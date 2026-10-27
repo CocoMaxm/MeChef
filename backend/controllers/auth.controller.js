@@ -251,7 +251,7 @@ exports.googleAuth = async (req, res, next) => {
                     if (!password) {
                         return res.status(409).json({
                             success: false, code: 'PASSWORD_REQUIRED',
-                            error: 'You already have a ChefMtaani account with this email. Enter its password once to connect your Google account.'
+                            error: 'You already have a MyMealChef account with this email. Enter its password once to connect your Google account.'
                         });
                     }
                     if (!(await existing.comparePassword(String(password)))) {
@@ -309,9 +309,9 @@ exports.forgotPassword = async (req, res, next) => {
                 // not awaited: the response time must not reveal whether the account exists
                 sendEmail.safe({
                     email: user.email,
-                    subject: 'Reset your ChefMtaani password',
+                    subject: 'Reset your MyMealChef password',
                     html: `<h2>Reset your password</h2>
-                        <p>Hi ${escapeHtml(user.firstName)}, we received a request to reset the password of your ChefMtaani account.</p>
+                        <p>Hi ${escapeHtml(user.firstName)}, we received a request to reset the password of your MyMealChef account.</p>
                         <p><a href="${link}" style="display:inline-block;padding:10px 18px;background:#ff6b6b;color:#fff;text-decoration:none;border-radius:6px">Choose a new password</a></p>
                         <p>Or copy this link into your browser:<br>${link}</p>
                         <p>The link works once and expires in ${RESET_MINUTES} minutes. If you did not ask for this, ignore this email: your password stays the same.</p>`
@@ -353,8 +353,8 @@ exports.resetPassword = async (req, res, next) => {
 
         await sendEmail.safe({
             email: user.email,
-            subject: 'Your ChefMtaani password was changed',
-            html: `<p>Hi ${escapeHtml(user.firstName)}, the password of your ChefMtaani account was just changed.</p>
+            subject: 'Your MyMealChef password was changed',
+            html: `<p>Hi ${escapeHtml(user.firstName)}, the password of your MyMealChef account was just changed.</p>
                    <p>If this was not you, please reset it again straight away and contact us.</p>`
         });
 

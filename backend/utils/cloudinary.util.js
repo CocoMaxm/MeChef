@@ -29,7 +29,7 @@ const createUploadSignature = (chefId) => {
         throw err;
     }
     const timestamp = Math.floor(Date.now() / 1000);
-    const folder = `chefmtaani/chef-${chefId}/discovery`;
+    const folder = `mymealchef/chef-${chefId}/discovery`;
     const publicId = `${folder}/${Date.now()}-${crypto.randomUUID()}`;
     const params = { public_id: publicId, timestamp };
     if (c.uploadPreset) params.upload_preset = c.uploadPreset;
@@ -60,7 +60,7 @@ const verifyDiscoveryAsset = async ({ chefId, publicId, resourceType }) => {
     if (!['image', 'video'].includes(resourceType) || typeof publicId !== 'string' || publicId.length > 220) {
         throw new Error('Invalid uploaded media reference.');
     }
-    const folder = `chefmtaani/chef-${chefId}/discovery/`;
+    const folder = `mymealchef/chef-${chefId}/discovery/`;
     if (!publicId.startsWith(folder)) throw new Error('That media does not belong to your chef account.');
     const asset = await getCloudinaryResource(resourceType, publicId);
     if (!asset || asset.public_id !== publicId || asset.resource_type !== resourceType || !asset.secure_url) {
