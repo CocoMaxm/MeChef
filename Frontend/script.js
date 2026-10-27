@@ -1,6 +1,6 @@
 'use strict';
 /* =====================================================================
-   MyMealChef website
+   CuisineForMe website
    Sections: 1 helpers · 2 session & navigation · 3 browsing chefs ·
              4 sign-up / login · 5 booking (calendar + time slots) ·
              6 customer dashboard · 7 chef dashboard · 8 admin · 9 start-up
@@ -502,7 +502,7 @@ function afterLogin(r, message) {
     setSession(r.token, r.user);
     state.chef = r.chef || null;
     renderNav();
-    notify(message || (r.isNew ? `Welcome to MyMealChef, ${r.user.firstName}! Your account is ready.` : `Welcome back, ${r.user.firstName}!`));
+    notify(message || (r.isNew ? `Welcome to CuisineForMe, ${r.user.firstName}! Your account is ready.` : `Welcome back, ${r.user.firstName}!`));
     if (r.user.role === 'admin') showPage('adminPage');
     else if (r.user.role === 'chef') showPage('extranetPage');
     else { const back = state.returnTo || 'homePage'; state.returnTo = null; showPage(back); }
@@ -1876,7 +1876,7 @@ function renderKitchenPanel() {
                 <div class="form-check"><input class="form-check-input" type="radio" name="kArranged" id="kArrChef" value="chef" ${ks.courierArrangedBy === 'chef' ? 'checked' : ''}><label class="form-check-label" for="kArrChef">I book the rider</label></div>
                 <div class="form-check"><input class="form-check-input" type="radio" name="kArranged" id="kArrCustomer" value="customer" ${ks.courierArrangedBy === 'customer' ? 'checked' : ''}><label class="form-check-label" for="kArrCustomer">The customer books their own rider</label></div>
             </div>
-            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="kEnabled" ${ks.enabled ? 'checked' : ''}><label class="form-check-label" for="kEnabled"><strong>List my kitchen on MyMealChef</strong></label></div>
+            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="kEnabled" ${ks.enabled ? 'checked' : ''}><label class="form-check-label" for="kEnabled"><strong>List my kitchen on CuisineForMe</strong></label></div>
             <div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="kOpen" ${ks.acceptingOrders ? 'checked' : ''}><label class="form-check-label" for="kOpen">Open for orders now</label></div>
             <div id="kitchenChecklist" class="small mt-3"></div>
             <button type="submit" class="btn btn-primary mt-3">Save kitchen settings</button>
@@ -1899,7 +1899,7 @@ function renderKitchenStatus() {
     let html;
     if (!ks.isVerified) html = '<div class="alert alert-warning">Your chef profile must be approved before you can open a kitchen.</div>';
     else if (ks.enabled) html = `<div class="alert ${ks.acceptingOrders ? 'alert-success' : 'alert-secondary'} d-flex justify-content-between align-items-center flex-wrap gap-2"><span><i class="fas fa-store me-1"></i>Your kitchen is <strong>listed</strong> and <strong>${ks.acceptingOrders ? 'open' : 'closed'}</strong> for orders.</span><button class="btn btn-sm btn-light" data-action="toggleKitchenOpen">${ks.acceptingOrders ? 'Close for now' : 'Open for orders'}</button></div>`;
-    else html = '<div class="alert alert-light border">Your kitchen is not listed yet. Add meals, fill in the form below and switch on "List my kitchen on MyMealChef".</div>';
+    else html = '<div class="alert alert-light border">Your kitchen is not listed yet. Add meals, fill in the form below and switch on "List my kitchen on CuisineForMe".</div>';
     $('kitchenStatus').innerHTML = html;
 }
 

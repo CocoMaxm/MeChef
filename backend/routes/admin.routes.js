@@ -81,7 +81,7 @@ router.post('/chefs/:id/interview', [
         : `<p>We will call you on ${escapeHtml(application.phone)}.</p>`;
     await sendEmail.safe({
         email: chef.user.email,
-        subject: 'Your MyMealChef live interview',
+        subject: 'Your CuisineForMe live interview',
         html: `<h2>Your live interview is booked</h2><p><strong>${escapeHtml(whenText(scheduledAt, tz))}</strong></p>${link}
                <p>Please have your passport and certificates ready.</p>`
     });
@@ -127,7 +127,7 @@ router.post('/chefs/:id/interview/complete', [
     if (!passed) {
         await sendEmail.safe({
             email: chef.user.email,
-            subject: 'Update on your MyMealChef application',
+            subject: 'Update on your CuisineForMe application',
             html: `<p>Thank you for interviewing with us. Unfortunately we could not approve your application.</p>
                    ${reason ? `<p>${escapeHtml(reason)}</p>` : ''}<p>You can update your details and apply again.</p>`
         });
@@ -172,7 +172,7 @@ router.post('/verify-chef/:id', [
         }
         : {
             email: chef.user.email,
-            subject: 'Update on your MyMealChef application',
+            subject: 'Update on your CuisineForMe application',
             html: `<p>Unfortunately we could not approve your application.</p>${reason ? `<p>Reason: ${escapeHtml(reason)}</p>` : ''}<p>You can update your details and apply again.</p>`
         });
 

@@ -1,7 +1,7 @@
-# MyMealChef
+# CuisineForMe
 
 ```
-mymealchef/
+CuisineForMe/
   backend/    Node + Express + MongoDB API   (run everything from this folder)
   Frontend/   index.html, script.js, api.js, style.css   (served by the backend)
 ```
@@ -34,7 +34,7 @@ Approval is impossible until the live interview has been passed.
 ## Google sign-in (optional)
 The "Continue with Google" buttons only appear when `GOOGLE_CLIENT_ID` is set.
 1. Google Cloud Console (console.cloud.google.com) > create or pick a project.
-2. APIs & Services > OAuth consent screen: User type **External**, app name MyMealChef, your email as support/developer contact. Save.
+2. APIs & Services > OAuth consent screen: User type **External**, app name CuisineForMe, your email as support/developer contact. Save.
    While the app is in **Testing**, only emails listed under "Test users" can sign in. Click **Publish app** so everyone can (basic sign-in needs no Google review).
 3. APIs & Services > Credentials > Create credentials > **OAuth client ID** > Web application.
    Authorised JavaScript origins: `http://localhost`, `http://localhost:5000`, and your live site `https://mymealchef.onrender.com`. No redirect URI is needed.
