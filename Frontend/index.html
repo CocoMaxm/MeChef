@@ -12,7 +12,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#" onclick="showPage('homePage')">
+            <a class="navbar-brand" href="#" aria-label="MyMealChef home" onclick="showPage('homePage'); return false;">
                 <i class="fas fa-chef-hat"></i> MyMealChef
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -20,12 +20,10 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-lg-center">
-                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('homePage'); return false;">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('discoveryPage'); return false;">Discover</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('cuisinesPage'); return false;">Cuisines</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('orderFoodPage'); return false;">Chef-made meals</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('aboutPage'); return false;">About Us</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('contactPage'); return false;">Contact</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('extranetPage'); return false;">For Chefs</a></li>
                     <li class="nav-item ms-lg-3 my-2 my-lg-0">
                         <select class="form-select form-select-sm js-country-select" aria-label="Country"></select>
