@@ -432,6 +432,10 @@ h1, h2, h3, h4, h5, .navbar-brand { font-family: 'Playfair Display', Georgia, se
 .navbar { min-height: 76px; background: rgba(255,254,250,.97)!important; box-shadow: 0 1px 0 var(--cm-line); backdrop-filter: blur(14px); }
 .navbar-brand { color: var(--cm-ink)!important; font-size: 1.55rem; letter-spacing: -.04em; }
 .navbar-brand i { color: var(--cm-rust); font-size: 1.15rem; margin-right: .35rem; }
+.navbar-controls { flex-shrink: 0; }
+.navbar-controls .form-select { min-width: 142px; }
+.nav-auth-cta { --bs-btn-color: #fff; --bs-btn-bg: var(--cm-rust); --bs-btn-border-color: var(--cm-rust); --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #98482e; --bs-btn-hover-border-color: #98482e; --bs-btn-active-color: #fff; --bs-btn-active-bg: #98482e; --bs-btn-active-border-color: #98482e; border-radius: 999px; font-weight: 700; padding: .55rem 1rem; box-shadow: 0 5px 14px rgba(182,91,59,.2); white-space: nowrap; }
+.nav-auth-cta:hover { box-shadow: 0 7px 18px rgba(182,91,59,.28); transform: translateY(-1px); }
 .nav-link { color: #46534a!important; font-size: .9rem; font-weight: 600; padding-inline: .8rem!important; }
 .nav-link:hover, .nav-link:focus { color: var(--cm-rust)!important; }
 .navbar .btn-outline-primary, .btn-outline-primary { --bs-btn-color: var(--cm-ink); --bs-btn-border-color: rgba(29,48,44,.35); --bs-btn-hover-bg: var(--cm-ink); --bs-btn-hover-border-color: var(--cm-ink); --bs-btn-hover-color: #fff; --bs-btn-active-bg: var(--cm-ink); --bs-btn-active-border-color: var(--cm-ink); }

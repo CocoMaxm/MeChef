@@ -19,17 +19,19 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-lg-center">
+                <ul class="navbar-nav me-auto align-items-lg-center">
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('discoveryPage'); return false;">Discover</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('cuisinesPage'); return false;">Cuisines</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('orderFoodPage'); return false;">Chef-made meals</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('aboutPage'); return false;">About Us</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="showPage('extranetPage'); return false;">For Chefs</a></li>
-                    <li class="nav-item ms-lg-3 my-2 my-lg-0">
-                        <select class="form-select form-select-sm js-country-select" aria-label="Country"></select>
-                    </li>
-                    <li class="nav-item ms-lg-2 my-2 my-lg-0" id="navAuth"></li>
                 </ul>
+                <div class="navbar-controls d-flex flex-column flex-lg-row align-items-lg-center ms-lg-auto">
+                    <div class="nav-item my-2 my-lg-0">
+                        <select class="form-select form-select-sm js-country-select" aria-label="Country"></select>
+                    </div>
+                    <div class="nav-item ms-lg-3 my-2 my-lg-0" id="navAuth"></div>
+                </div>
             </div>
         </div>
     </nav>

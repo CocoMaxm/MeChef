@@ -228,7 +228,7 @@ function renderNav() {
     const el = $('navAuth');
     const u = state.user;
     if (!u) {
-        el.innerHTML = '<a class="btn btn-sm btn-outline-primary" href="#" data-action="goPage" data-page="customerAuthPage">Log in / Sign up</a>';
+        el.innerHTML = '<a class="btn btn-sm nav-auth-cta" href="#" data-action="goPage" data-page="customerAuthPage">Log in / Sign up</a>';
         return;
     }
     const target = { customer: ['myBookingsPage', 'My Bookings'], chef: ['extranetPage', 'My Dashboard'], admin: ['adminPage', 'Admin'] }[u.role];
