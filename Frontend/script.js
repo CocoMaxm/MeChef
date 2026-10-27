@@ -29,7 +29,7 @@ let sessionId = 0;
 const state = {
     user: null, chef: null, application: null,
     countries: [], countryCode: localStorage.getItem('country') || 'KE',
-    chefs: [], cuisine: null,
+    chefs: [], cuisine: null, chefSearchCity: '', chefSearchActive: false, homeOrderSearch: null,
     booking: null,
     reasonCodes: [],
     myBookings: [], chefBookings: [], timeOff: [],
@@ -254,7 +254,7 @@ function setCountry(code) {
     document.querySelectorAll('.js-country-select').forEach((s) => { s.value = code; });
     if ($('cuisinesPage').style.display === 'block') {
         loadCuisineStats();
-        if (state.cuisine) showChefs(state.cuisine);
+        if (state.chefSearchActive) showChefs(state.cuisine, state.chefSearchCity);
     }
     if ($('orderFoodPage').style.display === 'block') searchKitchens();
     if ($('homePage').style.display === 'block') loadFeaturedChefs();
@@ -309,35 +309,69 @@ async function loadCuisineStats() {
     } catch (e) { /* keep the default text */ }
 }
 
-async function showChefs(cuisine) {
-    state.cuisine = cuisine;
+async function showChefs(cuisine, city = '') {
+    const selectedCuisine = String(cuisine || '').trim();
+    const selectedCity = String(city || '').trim();
+    state.cuisine = selectedCuisine || null;
+    state.chefSearchCity = selectedCity;
+    state.chefSearchActive = true;
     const c = getCountry();
     showPage('cuisinesPage');
     document.querySelector('#cuisinesPage section.container').style.display = 'none';
     $('chefDisplaySection').style.display = 'block';
-    $('selectedCuisineTitle').textContent = `${cuisine} chefs in ${c.name}`;
+    $('selectedCuisineTitle').textContent = `${selectedCuisine ? `${selectedCuisine} chefs` : 'Personal chefs'} in ${selectedCity || c.name}`;
     $('chefsList').innerHTML = '<div class="text-center text-muted py-5">Loading chefs…</div>';
-    $('cuisinePostSection').style.display = 'block'; $('cuisinePostTitle').textContent = cuisine;
-    api.discovery.posts({ cuisine, country: c.code }).then((posts) => {
+    $('cuisinePostSection').style.display = 'block'; $('cuisinePostTitle').textContent = selectedCuisine || 'all cuisines';
+    const postFilters = { country: c.code, ...(selectedCuisine ? { cuisine: selectedCuisine } : {}) };
+    api.discovery.posts(postFilters).then((posts) => {
         $('cuisinePostFeed').innerHTML = posts.data.length ? posts.data.map(postMarkup).join('') : '<div class="text-muted">No cooking stories in this cuisine yet.</div>';
         observeStoryVideos($('cuisinePostFeed'));
     }).catch(() => { $('cuisinePostFeed').innerHTML = '<div class="text-muted">Stories could not be loaded.</div>'; });
-    const r = await guard(() => api.chefs.getAll({ cuisine, country: c.code }));
+    const r = await guard(() => api.chefs.getAll({ cuisine: selectedCuisine, city: selectedCity, country: c.code }));
     state.chefs = r ? r.data : [];
     displayChefs();
 }
 
 function hideChefs() {
     state.cuisine = null;
+    state.chefSearchCity = '';
+    state.chefSearchActive = false;
     document.querySelector('#cuisinesPage section.container').style.display = 'block';
     $('chefDisplaySection').style.display = 'none';
     $('cuisinePostSection').style.display = 'none';
 }
 
+let homeSearchMode = 'chef';
+function setHomeSearchMode(mode) {
+    if (!['chef', 'meal'].includes(mode)) return;
+    homeSearchMode = mode;
+    document.querySelectorAll('.home-search-mode').forEach((button) => {
+        const selected = button.dataset.mode === mode;
+        button.classList.toggle('active', selected);
+        button.setAttribute('aria-pressed', String(selected));
+    });
+    $('homeSearchForm').querySelector('.home-search-submit span').textContent = mode === 'chef' ? 'Find a chef' : 'Find meals';
+    $('homeSearchCity').placeholder = mode === 'chef' ? 'Where should your chef cook?' : 'Where should we look?';
+    document.querySelector('.home-search-note-chef').hidden = mode !== 'chef';
+    document.querySelector('.home-search-note-meal').hidden = mode !== 'meal';
+}
+
+async function submitHomeSearch() {
+    const city = $('homeSearchCity').value.trim();
+    const cuisine = $('homeSearchCuisine').value;
+    if (homeSearchMode === 'meal') {
+        state.homeOrderSearch = { city, cuisine };
+        showPage('orderFoodPage');
+        return;
+    }
+    await showChefs(cuisine, city);
+}
+
 function displayChefs() {
     const list = $('chefsList');
     if (!state.chefs.length) {
-        list.innerHTML = `<div class="col-12"><div class="alert alert-light border">No ${esc(state.cuisine)} chefs are available in ${esc(getCountry().name)} yet. Try another country using the selector above.</div></div>`;
+        const searchSummary = [state.cuisine ? `${state.cuisine} chefs` : 'chefs', `in ${state.chefSearchCity || getCountry().name}`].join(' ');
+        list.innerHTML = `<div class="col-12"><div class="alert alert-light border">No ${esc(searchSummary)} are available yet. Try another cuisine or location.</div></div>`;
         return;
     }
     list.innerHTML = state.chefs.map((chef) => {
@@ -1414,8 +1448,15 @@ async function loadOrderFoodPage() {
     const cu = $('searchCuisine'), di = $('searchDietary');
     if (cu.options.length <= 1) meta.cuisines.forEach((x) => addOption(cu, x, x));
     if (di.options.length <= 1) meta.dietary.forEach((d) => addOption(di, d.code, d.label));
-    if (!$('searchCity').value) $('searchCity').value = localStorage.getItem('orderCity') || '';
-    if (!$('searchArea').value) $('searchArea').value = localStorage.getItem('orderArea') || '';
+    if (state.homeOrderSearch) {
+        $('searchCity').value = state.homeOrderSearch.city;
+        $('searchArea').value = '';
+        cu.value = state.homeOrderSearch.cuisine;
+        state.homeOrderSearch = null;
+    } else {
+        if (!$('searchCity').value) $('searchCity').value = localStorage.getItem('orderCity') || '';
+        if (!$('searchArea').value) $('searchArea').value = localStorage.getItem('orderArea') || '';
+    }
     await searchKitchens();
 }
 
@@ -1577,6 +1618,7 @@ function updateCheckoutView() {
         + `<hr class="my-2"><div class="d-flex justify-content-between"><strong>Total</strong><strong>${esc(money(cartTotal(), c))}</strong></div>`;
 }
 
+formHandlers.homeSearchForm = async () => { await submitHomeSearch(); };
 formHandlers.kitchenSearchForm = () => searchKitchens();
 
 formHandlers.checkoutForm = async () => {
@@ -2207,6 +2249,7 @@ formHandlers.storyForm = async () => {
 /* ------------------------- clicks, forms and changes ------------------------- */
 const actions = {
     logout, goPage: (d) => showPage(d.page), bookChef: (d) => startBooking(d.id),
+    homeSearchMode: (d) => setHomeSearchMode(d.mode),
     calPrev: () => changeMonth(-1), calNext: () => changeMonth(1),
     pickDate: (d) => pickDate(d.date), pickSlot: (d) => pickSlot(d.time), confirmBooking,
     openReview: (d) => openReview(d.id),

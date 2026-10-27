@@ -71,6 +71,37 @@
         </section>
 
         <section class="section-shell cuisine-discovery" id="discoverCuisines">
+            <div class="home-search-banner">
+                <div class="home-search-top">
+                    <div class="home-search-intro">
+                        <span class="home-search-kicker"><i class="fas fa-sparkles"></i> Your table, your way</span>
+                        <h2>What sounds delicious?</h2>
+                    </div>
+                    <div class="home-search-modes" role="group" aria-label="Choose what to find">
+                        <button type="button" class="home-search-mode active" data-action="homeSearchMode" data-mode="chef" aria-pressed="true"><i class="fas fa-user"></i> Book a chef</button>
+                        <button type="button" class="home-search-mode" data-action="homeSearchMode" data-mode="meal" aria-pressed="false"><i class="fas fa-bowl-food"></i> Order a meal</button>
+                    </div>
+                </div>
+                <form id="homeSearchForm" class="home-search-fields">
+                    <div class="home-search-field">
+                        <label for="homeSearchCountry"><i class="fas fa-globe-africa"></i> Country</label>
+                        <select id="homeSearchCountry" class="form-select js-country-select" aria-label="Choose a country"></select>
+                    </div>
+                    <div class="home-search-field">
+                        <label for="homeSearchCity"><i class="fas fa-location-dot"></i> City or town</label>
+                        <input type="text" class="form-control" id="homeSearchCity" placeholder="Where should we look?" maxlength="80" autocomplete="address-level2">
+                    </div>
+                    <div class="home-search-field">
+                        <label for="homeSearchCuisine"><i class="fas fa-utensils"></i> Cuisine</label>
+                        <select id="homeSearchCuisine" class="form-select">
+                            <option value="">Any cuisine</option>
+                            <option>Kenyan</option><option>Swahili</option><option>Indian</option><option>Ethiopian</option><option>Italian</option><option>Continental</option><option>French</option><option>Asian</option><option>Chinese</option><option>Japanese</option><option>Thai</option><option>Mediterranean</option><option>Mexican</option><option>American</option><option>Other</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="home-search-submit"><i class="fas fa-magnifying-glass"></i><span>Find a chef</span></button>
+                </form>
+                <div class="home-search-note"><i class="fas fa-house"></i><span class="home-search-note-chef">Meet a chef who cooks in your home or chosen venue.</span><span class="home-search-note-meal" hidden>Find chef-made meals for pickup or local delivery.</span></div>
+            </div>
             <div class="section-heading">
                 <div><span class="eyebrow">A world of flavour</span><h2>What are you in the mood for?</h2><p>Start with a cuisine. Find a chef who can bring its stories and flavours to your table.</p></div>
                 <a href="#" class="section-link" onclick="showPage('cuisinesPage'); return false;">Explore all cuisines <i class="fas fa-arrow-right"></i></a>
