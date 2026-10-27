@@ -14,7 +14,7 @@ const hashToken = (t) => crypto.createHash('sha256').update(t).digest('hex');
 
 // Public address of the website, used for links in emails
 const appUrl = () => String(process.env.APP_URL
-    || (process.env.NODE_ENV === 'production' ? 'https://chefmtaani.onrender.com' : `http://localhost:${process.env.PORT || 5000}`)).replace(/\/+$/, '');
+    || (process.env.NODE_ENV === 'production' ? 'https://mymealchef.onrender.com' : `http://localhost:${process.env.PORT || 5000}`)).replace(/\/+$/, '');
 
 // "+254 712-345 678" / "00254712345678" -> "+254712345678"; null when it is not a plausible international number
 const normalizePhone = (raw) => {

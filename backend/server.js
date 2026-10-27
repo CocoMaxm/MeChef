@@ -39,7 +39,7 @@ app.use(helmet({
             fontSrc: ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
             imgSrc: ["'self'", "data:", "https:", "http:"],
             mediaSrc: ["'self'", "https://res.cloudinary.com"],
-            connectSrc: ["'self'", "http://localhost:5000", "https://chefmtaani.onrender.com", "https://cdnjs.cloudflare.com", "https://accounts.google.com/gsi/", "https://api.cloudinary.com"],
+            connectSrc: ["'self'", "http://localhost:5000", "https://mymealchef.onrender.com", "https://cdnjs.cloudflare.com", "https://accounts.google.com/gsi/", "https://api.cloudinary.com"],
             frameSrc: ["'self'", "https://accounts.google.com/gsi/"],
         },
     },
@@ -47,7 +47,7 @@ app.use(helmet({
 
 // 2. CORS
 const allowedOrigins = process.env.NODE_ENV === 'production'
-    ? ['https://chefmtaani.onrender.com']
+    ? ['https://mymealchef.onrender.com']
     : ['http://127.0.0.1:5500', 'http://localhost:5500', 'http://localhost:5000'];
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 

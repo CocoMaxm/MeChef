@@ -37,7 +37,7 @@ The "Continue with Google" buttons only appear when `GOOGLE_CLIENT_ID` is set.
 2. APIs & Services > OAuth consent screen: User type **External**, app name MyMealChef, your email as support/developer contact. Save.
    While the app is in **Testing**, only emails listed under "Test users" can sign in. Click **Publish app** so everyone can (basic sign-in needs no Google review).
 3. APIs & Services > Credentials > Create credentials > **OAuth client ID** > Web application.
-   Authorised JavaScript origins: `http://localhost`, `http://localhost:5000`, and your live site `https://chefmtaani.onrender.com`. No redirect URI is needed.
+   Authorised JavaScript origins: `http://localhost`, `http://localhost:5000`, and your live site `https://mymealchef.onrender.com`. No redirect URI is needed.
 4. Copy the **Client ID** (no secret needed) into `backend/.env` as `GOOGLE_CLIENT_ID=...` and into the Render environment variables. Restart the server.
 
 Rules: a brand-new Google sign-up becomes a customer. Anyone who already has an account with the same email enters that
@@ -47,7 +47,7 @@ Chefs still apply through the chef sign-up form; afterwards they can use Google 
 ## Forgot password
 "Forgot password?" (on both login forms) emails a link that opens the "choose a new password" page.
 - Needs working email: `EMAIL_*` in `.env` (for Gmail use an App Password) and `APP_URL` set to the site's address
-  (`http://localhost:5000` locally, `https://chefmtaani.onrender.com` live) so the link in the email points to the right place.
+  (`http://localhost:5000` locally, `https://mymealchef.onrender.com` live) so the link in the email points to the right place.
 - The link works once and expires after 60 minutes. Asking again within a minute sends nothing new.
 - After a reset every older login on that account is signed out.
 - Accounts that signed up with Google can use the same link to add a password.
